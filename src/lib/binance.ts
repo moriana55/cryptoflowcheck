@@ -231,6 +231,26 @@ export async function fetchGlobalMarketData(
   coins: { id: string; pair: string; symbol: string; name: string; circulatingSupply: number | null; category: string }[]
 ): Promise<GlobalMarketData | { error: string }> {
   try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    const res = await fetch("https://api.coingecko.com/api/v3/global", {
+      signal: controller.signal,
+      next: { revalidate: 300 } as any,
+    });
+    clearTimeout(timeout);
+
+    if (res.ok) {
+      const json = await res.json();
+      const d = json.data;
+      return {
+        total_market_cap: d.total_market_cap?.usd ?? 0,
+        btc_dominance: d.market_cap_percentage?.btc ?? 0,
+        market_cap_change_24h: d.market_cap_change_percentage_24h_usd ?? 0,
+      };
+    }
+
+    // Fallback: calculate from tracked coins if CoinGecko is down
     const data = await fetchBinanceCoins(coins);
     const totalMcap = data.reduce((sum, c) => sum + (c.market_cap ?? 0), 0);
     const btcCoin = data.find((c) => c.id === "bitcoin");

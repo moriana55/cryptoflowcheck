@@ -1,79 +1,100 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { isAdmin, getBlogPosts } from "@/lib/admin";
 import { getCoinList } from "@/lib/coins";
-import { LogOut, FileText, Coins, LayoutDashboard } from "lucide-react";
+import { FileText, Coins, Zap, Settings, TrendingUp, Clock } from "lucide-react";
+
+interface BlogPost {
+  id: string; title: string; date: string; tags: string[];
+}
 
 export default function AdminDashboardPage() {
-  const router = useRouter();
-  const [stats, setStats] = useState({ coins: 0, blogs: 0 });
-  const [checked, setChecked] = useState(false);
+  const [stats, setStats] = useState({ coins: 0, blogs: 0, latestBlog: "" });
+  const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
 
   useEffect(() => {
-    if (!isAdmin()) {
-      window.location.href = "/admin/login";
-    } else {
-      setStats({ coins: getCoinList().length, blogs: getBlogPosts().length });
-    }
-    setChecked(true);
-  }, [router]);
+    fetch("/api/blog")
+      .then((r) => r.json())
+      .then((posts: BlogPost[]) => {
+        setStats({
+          coins: getCoinList().length,
+          blogs: posts.length,
+          latestBlog: posts[0]?.date || "-",
+        });
+        setRecentPosts(posts.slice(0, 5));
+      })
+      .catch(console.error);
+  }, []);
 
-  if (!checked) {
-    return (
-      <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-        <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest animate-pulse">Checking credentials...</div>
-      </div>
-    );
-  }
+  const cards = [
+    { label: "Toplam Blog", value: stats.blogs, icon: FileText, color: "text-cyan-400", bg: "bg-cyan-400/10" },
+    { label: "Takip Edilen Coin", value: stats.coins, icon: Coins, color: "text-purple-400", bg: "bg-purple-400/10" },
+    { label: "Son Blog Tarihi", value: stats.latestBlog, icon: Clock, color: "text-amber-400", bg: "bg-amber-400/10" },
+  ];
+
+  const quickLinks = [
+    { href: "/admin/blog", label: "Blog Yönetimi", desc: "Yazı ekle, düzenle, sil", icon: FileText, color: "text-cyan-400" },
+    { href: "/admin/coins", label: "Coin Yönetimi", desc: "Coin ekle/çıkar", icon: Coins, color: "text-purple-400" },
+    { href: "/admin/cron", label: "Cron & AI", desc: "Manuel blog üret, cron tetikle", icon: Zap, color: "text-amber-400" },
+    { href: "/admin/ayarlar", label: "Ayarlar", desc: "Site ayarları", icon: Settings, color: "text-gray-400" },
+  ];
 
   return (
-    <div className="min-h-screen bg-bg-dark">
-      <header className="h-16 border-b border-white/5 flex items-center justify-between container mx-auto px-6">
-        <div className="flex items-center gap-3">
-          <LayoutDashboard className="w-5 h-5 text-accent-cyan" />
-          <span className="font-black text-sm tracking-tight">ADMIN PANEL</span>
-        </div>
-        <button
-          onClick={() => {
-            localStorage.removeItem("cfc-admin-session");
-            router.push("/admin/login");
-          }}
-          className="text-[10px] font-black text-text-secondary uppercase tracking-widest hover:text-white transition-colors flex items-center gap-2"
-        >
-          <LogOut className="w-4 h-4" /> Logout
-        </button>
-      </header>
-      <main className="container mx-auto px-6 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          <div className="glass-card text-center">
-            <div className="text-3xl font-black text-accent-cyan">{stats.coins}</div>
-            <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest mt-2">Tracked Coins</div>
+    <div className="space-y-8">
+      <div>
+        <h1 className="text-2xl font-black tracking-tight">Dashboard</h1>
+        <p className="text-sm text-gray-500 mt-1">CryptoFlowCheck yönetim paneli</p>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {cards.map((c, i) => (
+          <div key={i} className="bg-[#111118] border border-white/5 rounded-2xl p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.bg}`}>
+                <c.icon size={20} className={c.color} />
+              </div>
+            </div>
+            <p className="text-[28px] font-black text-white">{c.value}</p>
+            <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest mt-1">{c.label}</p>
           </div>
-          <div className="glass-card text-center">
-            <div className="text-3xl font-black text-accent-purple">{stats.blogs}</div>
-            <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest mt-2">Blog Posts</div>
-          </div>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <Link href="/admin/blog" className="glass-card hover:-translate-y-1 transition-transform flex items-center gap-4">
-            <FileText className="w-8 h-8 text-accent-cyan" />
+        ))}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        {quickLinks.map((q) => (
+          <Link
+            key={q.href}
+            href={q.href}
+            className="bg-[#111118] border border-white/5 rounded-2xl p-6 flex items-center gap-4 hover:border-white/10 transition-colors"
+          >
+            <q.icon size={28} className={q.color} />
             <div>
-              <div className="text-sm font-black">Blog Manager</div>
-              <div className="text-[10px] font-bold text-text-secondary">Create, edit, and delete blog posts</div>
+              <p className="text-[14px] font-black text-white">{q.label}</p>
+              <p className="text-[11px] text-gray-500 font-bold">{q.desc}</p>
             </div>
           </Link>
-          <Link href="/admin/coins" className="glass-card hover:-translate-y-1 transition-transform flex items-center gap-4">
-            <Coins className="w-8 h-8 text-accent-purple" />
-            <div>
-              <div className="text-sm font-black">Coin Manager</div>
-              <div className="text-[10px] font-bold text-text-secondary">Add or remove custom coins</div>
-            </div>
-          </Link>
+        ))}
+      </div>
+
+      {recentPosts.length > 0 && (
+        <div className="bg-[#111118] border border-white/5 rounded-2xl p-6">
+          <h3 className="text-[13px] font-black text-white uppercase tracking-widest mb-4 flex items-center gap-2">
+            <TrendingUp size={16} className="text-cyan-400" /> Son Yazılar
+          </h3>
+          <div className="space-y-3">
+            {recentPosts.map((p) => (
+              <div key={p.id} className="flex items-center justify-between py-2 border-b border-white/5 last:border-0">
+                <p className="text-[13px] font-bold text-gray-300 truncate max-w-[70%]">{p.title}</p>
+                <div className="flex items-center gap-3">
+                  <span className="text-[10px] text-gray-600 font-bold">{p.date}</span>
+                  <span className="text-[10px] text-cyan-400/60 font-bold">{p.tags?.length || 0} tag</span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-      </main>
+      )}
     </div>
   );
 }

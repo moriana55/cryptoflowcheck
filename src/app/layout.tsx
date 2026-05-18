@@ -37,6 +37,9 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     site: "@cryptoflowcheck",
   },
+  icons: {
+    icon: "/icon.svg",
+  },
 };
 
 export default function RootLayout({

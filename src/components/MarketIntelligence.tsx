@@ -120,18 +120,28 @@ export function SentimentGauge() {
   }, []);
 
   const displayValue = value ?? 0;
-  const rotation = (displayValue / 100) * 180 - 90;
+  const angle = (displayValue / 100) * 180;
+  const rad = (angle * Math.PI) / 180;
+  const r = 50;
+  const cx = 60;
+  const cy = 55;
+  const x = cx - r * Math.cos(rad);
+  const y = cy - r * Math.sin(rad);
+  const largeArc = angle > 90 ? 1 : 0;
+
+  const gaugeColor =
+    displayValue >= 75 ? "#34d399"
+    : displayValue >= 55 ? "#00F2FF"
+    : displayValue >= 45 ? "#fbbf24"
+    : displayValue >= 25 ? "#fb923c"
+    : "#f87171";
 
   const labelColor =
-    displayValue >= 75
-      ? "text-emerald-400"
-      : displayValue >= 55
-      ? "text-accent-cyan"
-      : displayValue >= 45
-      ? "text-amber-400"
-      : displayValue >= 25
-      ? "text-orange-400"
-      : "text-red-400";
+    displayValue >= 75 ? "text-emerald-400"
+    : displayValue >= 55 ? "text-accent-cyan"
+    : displayValue >= 45 ? "text-amber-400"
+    : displayValue >= 25 ? "text-orange-400"
+    : "text-red-400";
 
   return (
     <div className="glass-card text-center flex flex-col items-center">
@@ -139,18 +149,27 @@ export function SentimentGauge() {
         Fear & Greed Index
       </div>
 
-      <div className="relative w-32 h-16 mt-4 overflow-hidden">
-        <div className="absolute inset-0 border-[12px] border-white/5 rounded-t-full"></div>
-        <div
-          className="absolute inset-0 border-[12px] border-accent-cyan rounded-t-full origin-bottom"
-          style={{
-            clipPath: "inset(0 0 0 0)",
-            transform: `rotate(${rotation}deg)`,
-          }}
-        ></div>
-      </div>
+      <svg viewBox="0 0 120 70" className="w-40 h-24 mt-2">
+        <path
+          d={`M 10 55 A 50 50 0 0 1 110 55`}
+          fill="none"
+          stroke="rgba(255,255,255,0.08)"
+          strokeWidth="10"
+          strokeLinecap="round"
+        />
+        {value != null && (
+          <path
+            d={`M 10 55 A 50 50 0 ${largeArc} 1 ${x.toFixed(1)} ${y.toFixed(1)}`}
+            fill="none"
+            stroke={gaugeColor}
+            strokeWidth="10"
+            strokeLinecap="round"
+          />
+        )}
+        <circle cx={x} cy={y} r="4" fill={gaugeColor} />
+      </svg>
 
-      <div className="text-3xl font-black mt-4">
+      <div className="text-3xl font-black mt-2">
         {value != null ? value : "—"}
       </div>
       <div className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${labelColor}`}>
