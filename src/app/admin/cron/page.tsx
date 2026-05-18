@@ -33,7 +33,7 @@ export default function AdminCronPage() {
     <div className="space-y-8 max-w-2xl">
       <div>
         <h1 className="text-2xl font-black tracking-tight">Cron & AI Blog Üretici</h1>
-        <p className="text-sm text-gray-500 mt-1">Manuel olarak AI blog yazısı üret veya cron job'u test et</p>
+        <p className="text-sm text-gray-500 mt-1">Manuel olarak AI blog yazısı üret veya cron job{"'"}u test et</p>
       </div>
 
       <div className="bg-[#111118] border border-white/5 rounded-2xl p-6 space-y-5">
@@ -41,7 +41,7 @@ export default function AdminCronPage() {
           <Zap size={16} className="text-amber-400" /> Manuel Cron Tetikle
         </h3>
         <p className="text-[13px] text-gray-500">
-          Bu buton <code className="text-cyan-400">/api/cron/blog</code> endpoint'ini çağırır.
+          Bu buton <code className="text-cyan-400">/api/cron/blog</code> endpoint{"'"}ini çağırır.
           OpenAI ile güncel piyasa verilerine göre blog yazısı üretir ve kaydeder.
         </p>
 
