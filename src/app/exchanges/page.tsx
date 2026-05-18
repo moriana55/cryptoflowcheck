@@ -1,11 +1,59 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { SiteHeader } from "@/components/SiteStructure";
 import { PriceTicker } from "@/components/PriceTicker";
 import { EXCHANGES } from "@/data/exchanges";
-import { ArrowRightLeft, Star, Shield, TrendingUp, Globe, Zap } from "lucide-react";
+import { ArrowRightLeft, Star, Shield, TrendingUp, Globe, Zap, ChevronDown, Check } from "lucide-react";
 import Link from "next/link";
+
+function ExchangeDropdown({ value, onChange, accent = "cyan" }: { value: string; onChange: (v: string) => void; accent?: "cyan" | "purple" }) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
+  const selected = EXCHANGES.find(e => e.id === value);
+
+  useEffect(() => {
+    function handleClick(e: MouseEvent) { if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false); }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const borderOpen = accent === "cyan" ? "border-accent-cyan/40" : "border-accent-purple/40";
+  const activeBg = accent === "cyan" ? "bg-accent-cyan/10 text-accent-cyan" : "bg-accent-purple/10 text-accent-purple";
+
+  return (
+    <div ref={ref} className="relative">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full bg-white/5 border rounded-2xl px-4 py-3 text-sm font-bold outline-none transition-all flex items-center justify-between gap-2 hover:bg-white/[0.07] ${open ? `${borderOpen} bg-white/[0.08]` : "border-white/10"}`}
+      >
+        <span>{selected?.name ?? "Select"}</span>
+        <ChevronDown className={`w-4 h-4 text-text-secondary transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#1a1d2e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 backdrop-blur-xl">
+          {EXCHANGES.map(e => (
+            <button
+              key={e.id}
+              type="button"
+              onClick={() => { onChange(e.id); setOpen(false); }}
+              className={`w-full px-4 py-3 text-left text-sm font-bold flex items-center justify-between transition-colors ${e.id === value ? activeBg : "text-white/80 hover:bg-white/5"}`}
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-7 h-7 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-[10px] font-black uppercase">
+                  {e.name.slice(0, 2)}
+                </div>
+                <span>{e.name}</span>
+              </div>
+              {e.id === value && <Check className="w-4 h-4" />}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function ExchangesPage() {
   const [selectedA, setSelectedA] = useState(EXCHANGES[0].id);
@@ -36,17 +84,7 @@ export default function ExchangesPage() {
               <label className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary mb-2 block">
                 Exchange A
               </label>
-              <select
-                value={selectedA}
-                onChange={(e) => setSelectedA(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30 transition-colors"
-              >
-                {EXCHANGES.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name}
-                  </option>
-                ))}
-              </select>
+              <ExchangeDropdown value={selectedA} onChange={setSelectedA} accent="cyan" />
             </div>
 
             <div className="flex items-center justify-center">
@@ -59,17 +97,7 @@ export default function ExchangesPage() {
               <label className="text-[9px] font-black uppercase tracking-[0.3em] text-text-secondary mb-2 block">
                 Exchange B
               </label>
-              <select
-                value={selectedB}
-                onChange={(e) => setSelectedB(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-purple/30 transition-colors"
-              >
-                {EXCHANGES.map((e) => (
-                  <option key={e.id} value={e.id}>
-                    {e.name}
-                  </option>
-                ))}
-              </select>
+              <ExchangeDropdown value={selectedB} onChange={setSelectedB} accent="purple" />
             </div>
 
             <div className="flex items-end">
