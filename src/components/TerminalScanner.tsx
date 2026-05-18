@@ -28,8 +28,11 @@ export function TerminalScanner() {
   return (
     <div className="glass-card !p-0">
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/5 bg-white/2">
-        <span className="text-[10px] font-black tracking-widest text-text-secondary uppercase">Live Blockchain Scanner</span>
-        <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+        <span className="text-[10px] font-black tracking-widest text-text-secondary uppercase">Simulated Blockchain Scanner</span>
+        <div className="flex items-center gap-2">
+          <span className="text-[9px] font-bold text-text-secondary uppercase">Simulated</span>
+          <div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div>
+        </div>
       </div>
       <div className="p-4 font-mono text-[11px] space-y-2.5 h-[240px] overflow-hidden">
         {logs.map((log, i) => (

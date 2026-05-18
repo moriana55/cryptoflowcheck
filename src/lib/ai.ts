@@ -1,0 +1,295 @@
+"use server";
+
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
+async function fetchLiveMarketContext() {
+  try {
+    const [tickerRes, fgRes] = await Promise.all([
+      fetch(
+        "https://api.binance.com/api/v3/ticker/24hr?symbols=" +
+          encodeURIComponent(
+            JSON.stringify([
+              "BTCUSDT",
+              "ETHUSDT",
+              "SOLUSDT",
+              "BNBUSDT",
+              "XRPUSDT",
+              "DOGEUSDT",
+              "ADAUSDT",
+              "AVAXUSDT",
+              "LINKUSDT",
+              "DOTUSDT",
+            ])
+          )
+      ),
+      fetch("https://api.alternative.me/fng/?limit=1"),
+    ]);
+
+    const tickers = tickerRes.ok
+      ? ((await tickerRes.json()) as Array<{
+          symbol: string;
+          lastPrice: string;
+          priceChangePercent: string;
+          volume: string;
+          quoteVolume: string;
+        }>)
+      : [];
+
+    const fg = fgRes.ok ? await fgRes.json() : null;
+
+    const prices = tickers
+      .map((t) => {
+        const sym = t.symbol.replace("USDT", "");
+        const price = Number(t.lastPrice);
+        const change = Number(t.priceChangePercent);
+        const vol = Number(t.quoteVolume);
+        return `${sym}: $${price >= 1 ? price.toLocaleString("en-US", { maximumFractionDigits: 2 }) : price.toPrecision(4)} (${change >= 0 ? "+" : ""}${change.toFixed(2)}%) Vol: $${(vol / 1e6).toFixed(0)}M`;
+      })
+      .join(" | ");
+
+    const fearGreed = fg?.data?.[0];
+    const totalVol = tickers.reduce((sum, t) => sum + Number(t.quoteVolume), 0);
+
+    return `LIVE MARKET SNAPSHOT (${new Date().toISOString().slice(0, 10)}):
+${prices}
+Fear & Greed: ${fearGreed ? `${fearGreed.value} (${fearGreed.value_classification})` : "N/A"}
+Total Volume (top 10): $${(totalVol / 1e9).toFixed(1)}B`;
+  } catch (err) {
+    console.error("[AI] Market context fetch failed:", err);
+    return "LIVE MARKET SNAPSHOT: Unable to fetch live data.";
+  }
+}
+
+function internalLinksPrompt() {
+  return `
+
+INTERNAL LINKING REQUIREMENTS (CRITICAL):
+Throughout the article, naturally link to these internal pages using markdown links:
+- [Bitcoin](/coin/bitcoin) — mention when discussing BTC
+- [Ethereum](/coin/ethereum) — mention when discussing ETH  
+- [Solana](/coin/solana) — mention when discussing SOL
+- [Markets](/markets) — mention when discussing market overview
+- [Compare](/compare?a=bitcoin&b=ethereum) — mention when comparing assets
+- [Heatmap](/heatmap) — mention when discussing market visualization
+- [Exchanges](/exchanges) — mention when discussing trading platforms
+
+Use 4-6 internal links naturally within the content. Do NOT make them look forced.`;
+}
+
+export async function generateBlogWithAI(topic: string) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are the Chief Analyst at CryptoFlowCheck — a premium on-chain intelligence platform. Write in first-person plural (\"we\", \"our analysis\", \"our data shows\"). Your tone is authoritative, experienced, and data-driven. You have been tracking crypto markets since 2017. Always write in English." +
+          internalLinksPrompt(),
+      },
+      {
+        role: "user",
+        content: `Write a comprehensive, expert-level blog post about: ${topic}. 
+
+Requirements:
+- 1500+ words minimum
+- Start with a compelling # H1 title
+- Use ## H2 subheadings for structure
+- Include ### H3 subsections for technical depth
+- Write as an experienced analyst who has tracked markets for years
+- Include historical comparisons (\"This mirrors the pattern we saw in...\", \"Unlike the 2022 cycle...\")
+- Reference on-chain concepts: wallet flows, exchange inflows/outflows, whale accumulation, velocity, MVRV ratios
+- Use bullet points for key takeaways
+- Bold critical data points and conclusions
+- End with a forward-looking conclusion and risk disclaimer
+- Include a table comparing key metrics where relevant (use markdown table syntax)
+
+Begin with a # Heading for the title. Then write the full article.`,
+      },
+    ],
+    temperature: 0.7,
+  });
+
+  const text = completion.choices[0].message.content || "";
+  const titleMatch = text.match(/^#\s*(.+)/m);
+  const title = titleMatch ? titleMatch[1].trim() : topic;
+  const body = text.replace(/^#\s*.+\n?/, "").trim();
+  const excerpt = body
+    .replace(/[#*_`\[\]\(\)]/g, "")
+    .split("\n")
+    .filter((l) => l.trim().length > 0)
+    .slice(0, 2)
+    .join(" ")
+    .slice(0, 160);
+
+  return {
+    title,
+    slug: title.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "").slice(0, 60),
+    excerpt: excerpt || `In-depth analysis on ${topic} from the CryptoFlowCheck intelligence desk.`,
+    content: body,
+    tags: ["Analysis", "Crypto", "Market Intelligence"],
+    focusKeyword: topic.split(" ").slice(0, 3).join(" ").toLowerCase(),
+  };
+}
+
+export async function generateCompareInsight(coinA: string, coinB: string) {
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          "You are a crypto market analyst. Write a concise 2-paragraph comparison between two cryptocurrencies. Highlight key differences in technology, use case, market position, and recent momentum. Use markdown formatting with bullet points where helpful. Keep it under 300 words.",
+      },
+      {
+        role: "user",
+        content: `Compare ${coinA} vs ${coinB}.`,
+      },
+    ],
+    temperature: 0.7,
+  });
+
+  return completion.choices[0].message.content || "No insight available.";
+}
+
+async function fetchBinanceUSDTPairs(): Promise<{ symbol: string; quoteVolume: string; priceChangePercent: string }[]> {
+  try {
+    const res = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+    if (!res.ok) return [];
+    const data: Array<{ symbol: string; quoteVolume: string; priceChangePercent: string }> = await res.json();
+    return data
+      .filter((t) => t.symbol.endsWith("USDT") && !t.symbol.includes("DOWN") && !t.symbol.includes("UP"))
+      .sort((a, b) => Number(b.quoteVolume) - Number(a.quoteVolume))
+      .slice(0, 100);
+  } catch {
+    return [];
+  }
+}
+
+export async function findCoinsWithAI() {
+  console.log("[AI Scout] Starting findCoinsWithAI...");
+  const topPairs = await fetchBinanceUSDTPairs();
+  if (topPairs.length === 0) throw new Error("Could not fetch Binance pairs");
+
+  const pairList = topPairs
+    .slice(0, 50)
+    .map((t) => `${t.symbol} (vol: $${(Number(t.quoteVolume) / 1e6).toFixed(0)}M, chg: ${Number(t.priceChangePercent).toFixed(1)}%)`)
+    .join("\n");
+
+  try {
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content:
+            'You are a crypto market analyst. Given real Binance USDT pairs with their 24h volume and price change, pick the 8 most interesting coins to track (high volume gainers, notable movers, or emerging trends). Return ONLY a JSON array: [{"id":"coin-slug","symbol":"xxx","name":"Full Name","pair":"XXXUSDT","category":"LAYER 1|DEFI|MEMES|AI COINS|GAMING|EXCHANGE","reason":"1 sentence why"}]. Do NOT wrap in markdown code blocks. ONLY use pairs from the provided list.',
+        },
+        {
+          role: "user",
+          content: `Here are the top 50 Binance USDT pairs by volume right now:\n\n${pairList}\n\nPick the 8 most interesting to add to a crypto tracking dashboard. Return ONLY the JSON array.`,
+        },
+      ],
+      temperature: 0.4,
+    });
+
+    const text = completion.choices[0].message.content || "[]";
+    const clean = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+
+    const coins = JSON.parse(clean);
+    if (!Array.isArray(coins)) return [];
+
+    const validPairSet = new Set(topPairs.map((t) => t.symbol));
+    const validated = coins.filter((c: any) => validPairSet.has(c.pair));
+    console.log("[AI Scout] Found", validated.length, "validated coins");
+    return validated;
+  } catch (apiErr) {
+    console.error("[AI Scout] Error:", apiErr);
+    throw apiErr;
+  }
+}
+
+export async function generateAutoBlogWithAI() {
+  console.log("[AI Blog] Fetching live market context...");
+  const marketContext = await fetchLiveMarketContext();
+  console.log("[AI Blog] Market context:", marketContext.substring(0, 200));
+
+  const completion = await openai.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [
+      {
+        role: "system",
+        content:
+          `You are the Chief Analyst at CryptoFlowCheck — a premium on-chain intelligence platform specializing in whale flow tracking and market velocity analysis. You have been analyzing crypto markets since 2017.
+
+WRITING STYLE (E-E-A-T):
+- Use first-person plural: "we", "our analysis", "our data shows", "we have observed"
+- Sound like an experienced analyst, not a generic AI
+- Reference historical patterns: "This mirrors the accumulation phase we tracked in Q4 2020..."
+- Use on-chain terminology: wallet flows, exchange inflows/outflows, whale wallets, velocity, accumulation/distribution, MVRV, NVT
+- Connect to CryptoFlowCheck's brand: mention "flow" patterns, "wallet velocity", "exchange flow shifts"
+- Include specific price levels and percentage moves from the LIVE data
+- Bold key statistics and conclusions
+
+STRUCTURE REQUIREMENTS:
+- 1500+ words
+- # H1 compelling title
+- ## H2 subheadings for each major section
+- ### H3 for technical depth
+- Bullet points for key takeaways
+- Markdown table comparing metrics where relevant
+- Forward-looking conclusion with risk disclaimer
+
+INTERNAL LINKING:
+Naturally include 4-6 markdown links to internal pages:
+- [Bitcoin](/coin/bitcoin), [Ethereum](/coin/ethereum), [Solana](/coin/solana) when mentioning those coins
+- [Markets](/markets) for market overview references
+- [Compare](/compare?a=bitcoin&b=ethereum) for asset comparisons
+- [Heatmap](/heatmap) for market visualization references
+- [Exchanges](/exchanges) for trading platform mentions
+
+Return ONLY valid JSON:
+{"title":"SEO title under 60 chars","slug":"seo-friendly-slug","excerpt":"Meta description under 160 chars","content":"Full markdown article","tags":["tag1","tag2","tag3","tag4","tag5"],"focusKeyword":"main keyword"}
+
+Do NOT wrap in markdown code blocks.`,
+      },
+      {
+        role: "user",
+        content: `${marketContext}
+
+Based on this LIVE market data, write a comprehensive expert analysis. Pick the MOST significant trend visible in the data above (biggest gainer, notable loser, or market-wide shift). Dive deep into WHY this movement is happening, what the on-chain flows suggest, and what our models indicate for the next 7-30 days.
+
+Return ONLY the JSON object.`,
+      },
+    ],
+    temperature: 0.8,
+  });
+
+  const text = completion.choices[0].message.content || "{}";
+  const clean = text.replace(/```json\s*/g, "").replace(/```\s*/g, "").trim();
+
+  try {
+    const parsed = JSON.parse(clean);
+    return {
+      title: parsed.title || "Crypto Market Analysis",
+      slug: parsed.slug || "crypto-market-analysis",
+      excerpt: parsed.excerpt || "Latest insights from the CryptoFlowCheck intelligence desk.",
+      content: parsed.content || "## Overview\n\nContent coming soon.",
+      tags: Array.isArray(parsed.tags) ? parsed.tags : ["Crypto", "AI", "Analysis"],
+      focusKeyword: parsed.focusKeyword || "crypto",
+    };
+  } catch (err) {
+    console.error("[AI Blog] JSON parse failed:", err, "Raw text:", text.substring(0, 300));
+    return {
+      title: "Crypto Market Analysis",
+      slug: "crypto-market-analysis",
+      excerpt: "Latest insights from the CryptoFlowCheck intelligence desk.",
+      content: "## Overview\n\nContent coming soon.",
+      tags: ["Crypto", "AI", "Analysis"],
+      focusKeyword: "crypto",
+    };
+  }
+}
