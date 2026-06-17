@@ -4,8 +4,10 @@ import { saveServerBlogPost } from "@/lib/blog-store";
 import { randomUUID } from "crypto";
 
 export async function GET(request: NextRequest) {
+  const cronSecret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");
-  if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {
+  // Fail-closed: no secret configured => never authorize.
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

@@ -44,6 +44,11 @@ export default function PricingPage() {
       });
       const data = await res.json();
       if (data.url) {
+        // Identity hint only — tier is always re-derived server-side from the
+        // subscription store, never trusted from this cookie.
+        document.cookie = `cfc-user-email=${encodeURIComponent(
+          email.trim().toLowerCase()
+        )}; path=/; max-age=2592000; SameSite=Lax`;
         window.location.href = data.url;
       } else {
         alert(data.error || "Something went wrong");

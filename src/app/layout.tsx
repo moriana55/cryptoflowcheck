@@ -1,24 +1,29 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Merriweather } from "next/font/google";
+import { Geist, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Toaster } from "@/components/Toaster";
 
-const inter = Inter({
+const geist = Geist({
   subsets: ["latin"],
-  variable: "--font-inter",
+  variable: "--font-geist",
 });
 
-const merriweather = Merriweather({
-  weight: ["300", "400", "700", "900"],
+const manrope = Manrope({
   subsets: ["latin"],
-  variable: "--font-serif",
+  variable: "--font-manrope",
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  subsets: ["latin"],
+  variable: "--font-mono",
+  weight: ["500"],
 });
 
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#07090F",
+  themeColor: "#0b1326",
 };
 
 export const metadata: Metadata = {
@@ -48,8 +53,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable} ${merriweather.variable}`}>
-      <body className="antialiased font-inter relative">
+    <html lang="en" className={`dark ${geist.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
+      <body className="antialiased font-manrope relative bg-background text-on-surface">
         <ParticleBackground />
         <Toaster />
         <div className="relative z-10">{children}</div>

@@ -11,34 +11,40 @@ export interface BlogPost {
 const ADMIN_KEY = "cfc-admin-session";
 const BLOG_KEY = "cfc-blog-posts";
 
-// SHA-256 hash of "CryptoFlow2025!" — never store plaintext passwords in client code
-const ADMIN_HASH = "c7ef050a4efd7ab8d017e803747124a745b5c9a973c91d326d3a4136df95f1cb";
-
-async function sha256(message: string): Promise<string> {
-  const msgBuffer = new TextEncoder().encode(message);
-  const hashBuffer = await crypto.subtle.digest("SHA-256", msgBuffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-  return hashArray.map((b) => b.toString(16).padStart(2, "0")).join("");
-}
-
+/**
+ * Client login helper. The real credential check + the tamper-proof,
+ * HMAC-signed httpOnly cookie are issued server-side by /api/admin/login.
+ * The localStorage marker below is purely a non-authoritative UX hint so the
+ * admin layout can render optimistically; access is enforced by middleware
+ * verifying the signed cookie on every /admin/* request.
+ */
 export function isAdmin(): boolean {
   if (typeof window === "undefined") return false;
   return localStorage.getItem(ADMIN_KEY) === "authenticated";
 }
 
 export async function loginAdmin(password: string): Promise<boolean> {
-  const hash = await sha256(password);
-  if (hash === ADMIN_HASH) {
+  try {
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
+    });
+    if (!res.ok) return false;
     localStorage.setItem(ADMIN_KEY, "authenticated");
-    document.cookie = "cfc-admin=authenticated; path=/; max-age=86400; SameSite=Strict";
     return true;
+  } catch {
+    return false;
   }
-  return false;
 }
 
-export function logoutAdmin() {
+export async function logoutAdmin() {
   localStorage.removeItem(ADMIN_KEY);
-  document.cookie = "cfc-admin=; path=/; max-age=0";
+  try {
+    await fetch("/api/admin/login", { method: "DELETE" });
+  } catch {
+    // ignore — cookie will expire regardless
+  }
 }
 
 export function getBlogPosts(): BlogPost[] {

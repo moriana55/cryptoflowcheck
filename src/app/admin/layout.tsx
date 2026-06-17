@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
 import { isAdmin, logoutAdmin } from "@/lib/admin";
-import { LayoutDashboard, FileText, Coins, Settings, LogOut, Zap, Radio } from "lucide-react";
+import { LayoutDashboard, FileText, Coins, Settings, LogOut, Zap, BarChart3 } from "lucide-react";
 
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/metrics", label: "Metrikler", icon: BarChart3 },
   { href: "/admin/blog", label: "Blog Yazıları", icon: FileText },
   { href: "/admin/coins", label: "Coin Yönetimi", icon: Coins },
   { href: "/admin/cron", label: "Cron / AI", icon: Zap },

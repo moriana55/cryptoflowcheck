@@ -55,13 +55,13 @@ export function PriceTicker() {
   const doubled = [...items, ...items];
 
   return (
-    <div className="w-full bg-[#0C111D] border-b border-white/5 py-2.5 overflow-hidden">
+    <div className="w-full bg-surface-container-lowest py-2 border-b border-outline-variant/30 overflow-hidden relative z-[60]">
       <div className="relative">
-        <div className="flex gap-10 animate-[scroll_30s_linear_infinite] hover:[animation-play-state:paused] whitespace-nowrap">
+        <div className="flex gap-12 animate-[scroll_40s_linear_infinite] hover:[animation-play-state:paused] whitespace-nowrap px-gutter">
           {doubled.map((item, i) => (
             <div
               key={i}
-              className={`inline-flex items-center gap-2 text-xs font-bold shrink-0 px-2 py-0.5 rounded ${
+              className={`inline-flex items-center gap-2 font-mono text-label-md shrink-0 px-2 py-0.5 rounded ${
                 item.direction === "up"
                   ? "flash-up"
                   : item.direction === "down"
@@ -69,11 +69,8 @@ export function PriceTicker() {
                   : ""
               }`}
             >
-              <span className="text-text-secondary">{item.name}</span>
-              <span className="text-white">{item.price}</span>
-              <span className={item.up ? "text-emerald-400" : "text-red-400"}>
-                {item.change}
-              </span>
+              <span className="text-on-surface-variant">{item.name}</span>
+              <span className="text-primary font-bold">{item.price}</span>
             </div>
           ))}
         </div>

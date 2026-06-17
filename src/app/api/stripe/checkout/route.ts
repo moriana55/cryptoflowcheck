@@ -1,12 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getStripe, PLANS } from "@/lib/stripe";
+import { getStripe, PLANS, isStripeConfigured } from "@/lib/stripe";
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(request: NextRequest) {
+  if (!isStripeConfigured()) {
+    return NextResponse.json(
+      { error: "Payments are not enabled on this server yet." },
+      { status: 503 }
+    );
+  }
+
   try {
     const { email } = await request.json();
 
-    if (!email) {
-      return NextResponse.json({ error: "Email required" }, { status: 400 });
+    if (!email || typeof email !== "string" || !EMAIL_RE.test(email)) {
+      return NextResponse.json({ error: "Valid email required" }, { status: 400 });
     }
 
     const session = await getStripe().checkout.sessions.create({

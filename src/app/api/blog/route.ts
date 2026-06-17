@@ -1,11 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { saveServerBlogPost, getServerBlogPosts, deleteServerBlogPost } from "@/lib/blog-store";
+import { verifyAdminToken, ADMIN_COOKIE } from "@/lib/adminAuth";
 import { randomUUID } from "crypto";
 
-function isAuthed(req: NextRequest) {
-  const cookie = req.cookies.get("cfc-admin");
+async function isAuthed(req: NextRequest) {
+  const token = req.cookies.get(ADMIN_COOKIE)?.value;
   const authHeader = req.headers.get("authorization");
-  return cookie?.value === "authenticated" || authHeader === `Bearer ${process.env.CRON_SECRET}`;
+  const cronSecret = process.env.CRON_SECRET;
+  if (cronSecret && authHeader === `Bearer ${cronSecret}`) return true;
+  return verifyAdminToken(token);
 }
 
 export async function GET() {
@@ -14,7 +17,7 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  if (!isAuthed(request)) {
+  if (!(await isAuthed(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -34,7 +37,7 @@ export async function POST(request: NextRequest) {
 }
 
 export async function PUT(request: NextRequest) {
-  if (!isAuthed(request)) {
+  if (!(await isAuthed(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -54,7 +57,7 @@ export async function PUT(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  if (!isAuthed(request)) {
+  if (!(await isAuthed(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

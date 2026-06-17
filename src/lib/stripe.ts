@@ -2,9 +2,18 @@ import Stripe from "stripe";
 
 let _stripe: Stripe | null = null;
 
+export function isStripeConfigured(): boolean {
+  return Boolean(process.env.STRIPE_SECRET_KEY && process.env.STRIPE_PRO_PRICE_ID);
+}
+
 export function getStripe(): Stripe {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    // Fail-closed: never construct a client with an undefined key.
+    throw new Error("STRIPE_SECRET_KEY is not configured.");
+  }
   if (!_stripe) {
-    _stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    _stripe = new Stripe(key, {
       apiVersion: "2026-04-22.dahlia",
     });
   }

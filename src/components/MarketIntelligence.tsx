@@ -40,31 +40,31 @@ export function MarketHeatmap() {
   function getBg(change: number | null) {
     const op = getOpacity(change);
     if (change == null) return `rgba(255,255,255,0.05)`;
-    if (change >= 0) return `rgba(16,185,129,${Math.max(op, 0.1)})`; // emerald
-    return `rgba(239,68,68,${Math.max(op, 0.1)})`; // red
+    if (change >= 0) return `rgba(142,209,223,${Math.max(op, 0.1)})`;
+    return `rgba(255,180,171,${Math.max(op, 0.1)})`;
   }
 
   function getBorder(change: number | null) {
-    if (change == null) return "rgba(255,255,255,0.1)";
-    if (change >= 0) return `rgba(16,185,129,${Math.min(getOpacity(change) + 0.2, 1)})`;
-    return `rgba(239,68,68,${Math.min(getOpacity(change) + 0.2, 1)})`;
+    if (change == null) return "rgba(63,72,74,0.3)";
+    if (change >= 0) return `rgba(142,209,223,${Math.min(getOpacity(change) + 0.2, 1)})`;
+    return `rgba(255,180,171,${Math.min(getOpacity(change) + 0.2, 1)})`;
   }
 
   function getText(change: number | null) {
-    if (change == null) return "#8E96A4";
-    if (change >= 0) return "#34d399";
-    return "#f87171";
+    if (change == null) return "#bfc8ca";
+    if (change >= 0) return "#8ed1df";
+    return "#ffb4ab";
   }
 
   if (loading) {
     return (
-      <div className="glass-card">
-        <div className="text-[10px] font-black tracking-widest text-text-secondary uppercase mb-6 pl-3 border-l-2 border-accent-cyan">
+      <div className="glass-panel rounded-xl">
+        <div className="font-geist text-label-md text-on-surface-variant uppercase mb-6 pl-3 border-l-2 border-primary-container">
           Flow Heatmap
         </div>
         <div className="grid grid-cols-4 gap-3">
           {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="aspect-square rounded-xl bg-white/5 animate-pulse" />
+            <div key={i} className="aspect-square rounded-xl bg-surface-container-high animate-pulse" />
           ))}
         </div>
       </div>
@@ -72,8 +72,8 @@ export function MarketHeatmap() {
   }
 
   return (
-    <div className="glass-card">
-      <div className="text-[10px] font-black tracking-widest text-text-secondary uppercase mb-6 pl-3 border-l-2 border-accent-cyan">
+    <div className="glass-panel rounded-xl">
+      <div className="font-geist text-label-md text-on-surface-variant uppercase mb-6 pl-3 border-l-2 border-primary-container">
         Flow Heatmap
       </div>
       <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
@@ -81,7 +81,7 @@ export function MarketHeatmap() {
           <Link
             key={coin.id}
             href={`/coin/${coin.id}`}
-            className="aspect-square rounded-xl flex flex-col items-center justify-center text-[10px] font-black cursor-pointer transition-transform hover:scale-105 border"
+            className="aspect-square rounded-xl flex flex-col items-center justify-center text-[10px] font-bold cursor-pointer transition-transform hover:scale-105 border"
             style={{
               backgroundColor: getBg(coin.price_change_percentage_24h),
               borderColor: getBorder(coin.price_change_percentage_24h),
@@ -120,60 +120,64 @@ export function SentimentGauge() {
   }, []);
 
   const displayValue = value ?? 0;
-  const angle = (displayValue / 100) * 180;
-  const rad = (angle * Math.PI) / 180;
-  const r = 50;
-  const cx = 60;
-  const cy = 55;
-  const x = cx - r * Math.cos(rad);
-  const y = cy - r * Math.sin(rad);
-  const largeArc = angle > 90 ? 1 : 0;
 
   const gaugeColor =
-    displayValue >= 75 ? "#34d399"
-    : displayValue >= 55 ? "#00F2FF"
-    : displayValue >= 45 ? "#fbbf24"
-    : displayValue >= 25 ? "#fb923c"
-    : "#f87171";
+    displayValue >= 75 ? "#8ed1df"
+    : displayValue >= 55 ? "#b7c8e1"
+    : displayValue >= 45 ? "#fbb983"
+    : displayValue >= 25 ? "#be8453"
+    : "#ffb4ab";
 
   const labelColor =
-    displayValue >= 75 ? "text-emerald-400"
-    : displayValue >= 55 ? "text-accent-cyan"
-    : displayValue >= 45 ? "text-amber-400"
-    : displayValue >= 25 ? "text-orange-400"
-    : "text-red-400";
+    displayValue >= 75 ? "text-primary"
+    : displayValue >= 55 ? "text-secondary"
+    : displayValue >= 45 ? "text-tertiary"
+    : displayValue >= 25 ? "text-tertiary-container"
+    : "text-error";
 
   return (
-    <div className="glass-card text-center flex flex-col items-center">
-      <div className="text-[10px] font-black tracking-widest text-text-secondary uppercase mb-6 pl-3 border-l-2 border-accent-cyan self-start">
-        Fear & Greed Index
-      </div>
+    <div className="glass-panel p-stack-md rounded-xl text-center border-outline-variant/30">
+      <p className="font-geist text-label-md text-on-surface-variant mb-6 text-left">FEAR & GREED INDEX</p>
 
-      <svg viewBox="0 0 120 70" className="w-40 h-24 mt-2">
-        <path
-          d={`M 10 55 A 50 50 0 0 1 110 55`}
-          fill="none"
-          stroke="rgba(255,255,255,0.08)"
-          strokeWidth="10"
-          strokeLinecap="round"
-        />
-        {value != null && (
+      <div className="relative w-48 h-24 mx-auto overflow-hidden">
+        <svg className="w-full h-full" viewBox="0 0 100 50">
           <path
-            d={`M 10 55 A 50 50 0 ${largeArc} 1 ${x.toFixed(1)} ${y.toFixed(1)}`}
+            d="M 10 45 A 40 40 0 0 1 90 45"
             fill="none"
-            stroke={gaugeColor}
-            strokeWidth="10"
+            stroke="#2d3449"
             strokeLinecap="round"
+            strokeWidth="12"
           />
-        )}
-        <circle cx={x} cy={y} r="4" fill={gaugeColor} />
-      </svg>
-
-      <div className="text-3xl font-black mt-2">
-        {value != null ? value : "—"}
+          {value != null && (
+            <>
+              <defs>
+                <linearGradient id="fearGradient" x1="0%" x2="100%" y1="0%" y2="0%">
+                  <stop offset="0%" style={{ stopColor: "#ff5e00", stopOpacity: 1 }} />
+                  <stop offset="100%" style={{ stopColor: "#ffdcc3", stopOpacity: 1 }} />
+                </linearGradient>
+              </defs>
+              <path
+                className="gauge-glow"
+                d={`M 10 45 A 40 40 0 ${displayValue > 50 ? 1 : 0} 1 ${
+                  50 - 40 * Math.cos((displayValue / 100) * Math.PI)
+                } ${45 - 40 * Math.sin((displayValue / 100) * Math.PI)}`}
+                fill="none"
+                stroke={gaugeColor}
+                strokeLinecap="round"
+                strokeWidth="14"
+              />
+            </>
+          )}
+        </svg>
       </div>
-      <div className={`text-[10px] font-bold uppercase tracking-widest mt-1 ${labelColor}`}>
-        {label}
+
+      <div className="mt-4">
+        <h4 className="font-mono text-4xl font-bold" style={{ color: gaugeColor }}>
+          {value != null ? value : "—"}
+        </h4>
+        <p className={`font-mono text-lg font-bold mt-1 tracking-widest ${labelColor}`}>
+          {label.toUpperCase()}
+        </p>
       </div>
     </div>
   );
