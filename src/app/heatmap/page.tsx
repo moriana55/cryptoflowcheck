@@ -137,43 +137,63 @@ export default function HeatmapPage() {
             </button>
           </div>
         ) : (
-          <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-2">
-            {coins.map((coin) => {
-              const change = coin.price_change_percentage_24h;
-              return (
-                <Link
-                  key={coin.id}
-                  href={`/coin/${coin.id}`}
-                  className="aspect-square rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all hover:scale-105 hover:z-10 border"
-                  style={{
-                    backgroundColor: getBg(change),
-                    borderColor: getBorder(change),
-                  }}
-                >
-                  <span
-                    className="text-xs font-black uppercase"
-                    style={{ color: getTextColor(change) }}
-                  >
-                    {coin.symbol}
-                  </span>
-                  <span
-                    className="text-[10px] font-bold mt-0.5"
-                    style={{ color: getTextColor(change), opacity: 0.8 }}
-                  >
-                    {formatPrice(coin.current_price)}
-                  </span>
-                  <span
-                    className="text-[9px] font-black mt-0.5"
-                    style={{ color: getTextColor(change), opacity: 0.9 }}
-                  >
-                    {change != null
-                      ? (change >= 0 ? "+" : "") + change.toFixed(1) + "%"
-                      : "—"}
-                  </span>
-                </Link>
-              );
-            })}
-          </div>
+          /* Market-cap weighted treemap: each tile's flex-basis is proportional
+             to its share of total tracked market cap, so larger coins occupy
+             larger area — the classic heatmap/treemap layout. */
+          (() => {
+            const totalMcap = coins.reduce(
+              (s, c) => s + (c.market_cap ?? 0),
+              0
+            );
+            return (
+              <div className="flex flex-wrap gap-2">
+                {coins.map((coin) => {
+                  const change = coin.price_change_percentage_24h;
+                  const share =
+                    totalMcap > 0 ? (coin.market_cap ?? 0) / totalMcap : 0;
+                  // Clamp tile width between ~90px and ~340px equivalents.
+                  const basisPct = Math.min(
+                    Math.max(share * 100 * 3.5, 7),
+                    32
+                  );
+                  return (
+                    <Link
+                      key={coin.id}
+                      href={`/coin/${coin.id}`}
+                      className="rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all hover:scale-[1.03] hover:z-10 border min-h-[88px]"
+                      style={{
+                        backgroundColor: getBg(change),
+                        borderColor: getBorder(change),
+                        flexGrow: 1,
+                        flexBasis: `${basisPct}%`,
+                      }}
+                    >
+                      <span
+                        className="text-xs font-black uppercase"
+                        style={{ color: getTextColor(change) }}
+                      >
+                        {coin.symbol}
+                      </span>
+                      <span
+                        className="text-[10px] font-bold mt-0.5"
+                        style={{ color: getTextColor(change), opacity: 0.8 }}
+                      >
+                        {formatPrice(coin.current_price)}
+                      </span>
+                      <span
+                        className="text-[9px] font-black mt-0.5"
+                        style={{ color: getTextColor(change), opacity: 0.9 }}
+                      >
+                        {change != null
+                          ? (change >= 0 ? "+" : "") + change.toFixed(1) + "%"
+                          : "—"}
+                      </span>
+                    </Link>
+                  );
+                })}
+              </div>
+            );
+          })()
         )}
 
         {/* Legend */}

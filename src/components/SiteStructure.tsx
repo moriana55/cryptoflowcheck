@@ -7,8 +7,9 @@ import { toast } from "@/components/Toaster";
 
 const navItems = [
   { label: "Markets", href: "/markets" },
+  { label: "Portfolio", href: "/portfolio" },
+  { label: "Alerts", href: "/alerts" },
   { label: "Compare", href: "/compare" },
-  { label: "Exchanges", href: "/exchanges" },
   { label: "Heatmap", href: "/heatmap" },
   { label: "Events", href: "/events" },
   { label: "Pro", href: "/pricing" },
