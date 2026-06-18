@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getRequestTier } from "@/lib/tier";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
+import { csvCell } from "@/lib/csv";
 
 export const dynamic = "force-dynamic";
 
@@ -16,15 +17,6 @@ export const dynamic = "force-dynamic";
  */
 
 const MAX_ROWS = 1000;
-
-/** Escape a CSV cell and neutralise spreadsheet formula injection. */
-function csvCell(value: unknown): string {
-  let s = value == null ? "" : String(value);
-  // Prevent CSV formula injection (=, +, -, @, tab, CR).
-  if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
-  if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
-  return s;
-}
 
 function section(title: string, headers: string[], rows: unknown[][]): string {
   const out: string[] = [];
