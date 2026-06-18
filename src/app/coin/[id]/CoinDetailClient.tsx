@@ -102,7 +102,7 @@ export default function CoinDetailClient() {
         const chart = createChart(chartRef.current, {
           layout: {
             background: { type: ColorType.Solid, color: "transparent" },
-            textColor: "#8E96A4",
+            textColor: "#8a98b5",
             fontFamily: "Inter, sans-serif",
             fontSize: 11,
           },
@@ -112,12 +112,12 @@ export default function CoinDetailClient() {
           },
           crosshair: {
             vertLine: {
-              color: "rgba(0,242,255,0.3)",
+              color: "rgba(34,211,238,0.3)",
               width: 1,
               style: LineStyle.Dashed,
             },
             horzLine: {
-              color: "rgba(0,242,255,0.3)",
+              color: "rgba(34,211,238,0.3)",
               width: 1,
               style: LineStyle.Dashed,
             },
@@ -135,10 +135,10 @@ export default function CoinDetailClient() {
         });
 
         const series = chart.addSeries(LineSeries, {
-          color: "#00F2FF",
+          color: "#22d3ee",
           lineWidth: 2,
           priceScaleId: "right",
-          crosshairMarkerBackgroundColor: "#00F2FF",
+          crosshairMarkerBackgroundColor: "#22d3ee",
         });
 
         series.setData(

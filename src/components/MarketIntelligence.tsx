@@ -39,21 +39,21 @@ export function MarketHeatmap() {
 
   function getBg(change: number | null) {
     const op = getOpacity(change);
-    if (change == null) return `rgba(255,255,255,0.05)`;
-    if (change >= 0) return `rgba(142,209,223,${Math.max(op, 0.1)})`;
-    return `rgba(255,180,171,${Math.max(op, 0.1)})`;
+    if (change == null) return `rgba(31,42,66,0.5)`;
+    if (change >= 0) return `rgba(52,211,153,${Math.max(op, 0.1)})`;
+    return `rgba(248,113,113,${Math.max(op, 0.1)})`;
   }
 
   function getBorder(change: number | null) {
-    if (change == null) return "rgba(63,72,74,0.3)";
-    if (change >= 0) return `rgba(142,209,223,${Math.min(getOpacity(change) + 0.2, 1)})`;
-    return `rgba(255,180,171,${Math.min(getOpacity(change) + 0.2, 1)})`;
+    if (change == null) return "rgba(40,50,72,0.6)";
+    if (change >= 0) return `rgba(52,211,153,${Math.min(getOpacity(change) + 0.2, 1)})`;
+    return `rgba(248,113,113,${Math.min(getOpacity(change) + 0.2, 1)})`;
   }
 
   function getText(change: number | null) {
-    if (change == null) return "#bfc8ca";
-    if (change >= 0) return "#8ed1df";
-    return "#ffb4ab";
+    if (change == null) return "#8a98b5";
+    if (change >= 0) return "#6ee7b7";
+    return "#fca5a5";
   }
 
   if (loading) {
@@ -121,19 +121,22 @@ export function SentimentGauge() {
 
   const displayValue = value ?? 0;
 
+  // Fear & Greed semantics: extreme greed → green, neutral → amber,
+  // extreme fear → red. (Greed isn't inherently "good", but green/red here
+  // tracks the conventional crypto sentiment-gauge convention.)
   const gaugeColor =
-    displayValue >= 75 ? "#8ed1df"
-    : displayValue >= 55 ? "#b7c8e1"
-    : displayValue >= 45 ? "#fbb983"
-    : displayValue >= 25 ? "#be8453"
-    : "#ffb4ab";
+    displayValue >= 75 ? "#34d399"
+    : displayValue >= 55 ? "#6ee7b7"
+    : displayValue >= 45 ? "#fbbf24"
+    : displayValue >= 25 ? "#fb923c"
+    : "#f87171";
 
   const labelColor =
-    displayValue >= 75 ? "text-primary"
-    : displayValue >= 55 ? "text-secondary"
+    displayValue >= 75 ? "text-bullish-green"
+    : displayValue >= 55 ? "text-bullish-green"
     : displayValue >= 45 ? "text-tertiary"
-    : displayValue >= 25 ? "text-tertiary-container"
-    : "text-error";
+    : displayValue >= 25 ? "text-tertiary"
+    : "text-bearish-red";
 
   return (
     <div className="glass-panel p-stack-md rounded-xl text-center border-outline-variant/30">
@@ -144,7 +147,7 @@ export function SentimentGauge() {
           <path
             d="M 10 45 A 40 40 0 0 1 90 45"
             fill="none"
-            stroke="#2d3449"
+            stroke="#1f2a42"
             strokeLinecap="round"
             strokeWidth="12"
           />
@@ -172,7 +175,7 @@ export function SentimentGauge() {
       </div>
 
       <div className="mt-4">
-        <h4 className="font-mono text-4xl font-bold" style={{ color: gaugeColor }}>
+        <h4 className="font-mono text-4xl font-bold tabular-nums" style={{ color: gaugeColor }}>
           {value != null ? value : "—"}
         </h4>
         <p className={`font-mono text-lg font-bold mt-1 tracking-widest ${labelColor}`}>

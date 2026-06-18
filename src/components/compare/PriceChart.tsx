@@ -39,7 +39,7 @@ export function PriceChart({ coinAId, coinBId, coinASymbol, coinBSymbol, days, o
         const chart = createChart(chartRef.current, {
           layout: {
             background: { type: ColorType.Solid, color: "transparent" },
-            textColor: "#8E96A4",
+            textColor: "#8a98b5",
             fontFamily: "Inter, sans-serif",
             fontSize: 11,
           },
@@ -48,8 +48,8 @@ export function PriceChart({ coinAId, coinBId, coinASymbol, coinBSymbol, days, o
             horzLines: { color: "rgba(255,255,255,0.03)" },
           },
           crosshair: {
-            vertLine: { color: "rgba(0,242,255,0.3)", width: 1, style: LineStyle.Dashed },
-            horzLine: { color: "rgba(0,242,255,0.3)", width: 1, style: LineStyle.Dashed },
+            vertLine: { color: "rgba(34,211,238,0.3)", width: 1, style: LineStyle.Dashed },
+            horzLine: { color: "rgba(34,211,238,0.3)", width: 1, style: LineStyle.Dashed },
           },
           rightPriceScale: {
             borderColor: "rgba(255,255,255,0.05)",
@@ -72,10 +72,10 @@ export function PriceChart({ coinAId, coinBId, coinASymbol, coinBSymbol, days, o
 
         if (coinAData?.prices.length) {
           const seriesA = chart.addSeries(LineSeries, {
-            color: "#00F2FF",
+            color: "#22d3ee",
             lineWidth: 2,
             priceScaleId: "right",
-            crosshairMarkerBackgroundColor: "#00F2FF",
+            crosshairMarkerBackgroundColor: "#22d3ee",
           });
           seriesA.setData(
             coinAData.prices.map(([t, v]) => ({
@@ -87,10 +87,10 @@ export function PriceChart({ coinAId, coinBId, coinASymbol, coinBSymbol, days, o
 
         if (coinBData?.prices.length) {
           const seriesB = chart.addSeries(LineSeries, {
-            color: "#9D00FF",
+            color: "#a5b4fc",
             lineWidth: 2,
             priceScaleId: "left",
-            crosshairMarkerBackgroundColor: "#9D00FF",
+            crosshairMarkerBackgroundColor: "#a5b4fc",
           });
           seriesB.setData(
             coinBData.prices.map(([t, v]) => ({

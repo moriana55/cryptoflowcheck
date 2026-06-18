@@ -34,8 +34,8 @@ export function ExchangeSelector({ selected, onSelect, accent, label }: Exchange
   const accentColor = accent === "cyan" ? "accent-cyan" : "accent-purple";
   const accentBorder = accent === "cyan" ? "border-accent-cyan" : "border-accent-purple";
   const accentShadow = accent === "cyan"
-    ? "shadow-[0_0_30px_rgba(0,242,255,0.15)]"
-    : "shadow-[0_0_30px_rgba(157,0,255,0.15)]";
+    ? "shadow-[0_0_30px_rgba(34,211,238,0.15)]"
+    : "shadow-[0_0_30px_rgba(165,180,252,0.15)]";
   const accentBg = accent === "cyan" ? "bg-accent-cyan/10" : "bg-accent-purple/10";
 
   return (

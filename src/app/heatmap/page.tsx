@@ -60,20 +60,20 @@ export default function HeatmapPage() {
 
   function getBg(change: number | null) {
     const op = getOpacity(change);
-    if (change == null) return `rgba(255,255,255,0.03)`;
-    if (change >= 0) return `rgba(16,185,129,${Math.max(op, 0.15)})`;
-    return `rgba(239,68,68,${Math.max(op, 0.15)})`;
+    if (change == null) return `rgba(31,42,66,0.5)`;
+    if (change >= 0) return `rgba(52,211,153,${Math.max(op, 0.12)})`;
+    return `rgba(248,113,113,${Math.max(op, 0.12)})`;
   }
 
   function getBorder(change: number | null) {
-    if (change == null) return "rgba(255,255,255,0.08)";
+    if (change == null) return "rgba(40,50,72,0.8)";
     if (change >= 0)
-      return `rgba(16,185,129,${Math.min(getOpacity(change) + 0.2, 1)})`;
-    return `rgba(239,68,68,${Math.min(getOpacity(change) + 0.2, 1)})`;
+      return `rgba(52,211,153,${Math.min(getOpacity(change) + 0.25, 1)})`;
+    return `rgba(248,113,113,${Math.min(getOpacity(change) + 0.25, 1)})`;
   }
 
   function getTextColor(change: number | null) {
-    if (change == null) return "#8E96A4";
+    if (change == null) return "#8a98b5";
     if (change >= 0) return "#6ee7b7";
     return "#fca5a5";
   }
@@ -92,17 +92,17 @@ export default function HeatmapPage() {
       <main className="container mx-auto px-6 py-12">
         <Link
           href="/markets"
-          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-white transition-colors mb-6"
+          className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-on-surface transition-colors mb-6"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Markets
         </Link>
 
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">
             Market <span className="text-gradient">Heatmap</span>
           </h1>
           <p className="text-text-secondary text-sm max-w-lg">
-            Visual overview of the market. Green = bullish, Red = bearish. Intensity reflects the magnitude of 24h change.
+            Market-cap weighted treemap. Green = bullish, red = bearish; tile size reflects market cap and color intensity the magnitude of 24h change.
           </p>
         </div>
 
@@ -111,7 +111,7 @@ export default function HeatmapPage() {
             {Array.from({ length: 40 }).map((_, i) => (
               <div
                 key={i}
-                className="aspect-square rounded-xl bg-white/5 animate-pulse"
+                className="aspect-square rounded-xl skeleton"
               />
             ))}
           </div>
@@ -160,7 +160,7 @@ export default function HeatmapPage() {
                     <Link
                       key={coin.id}
                       href={`/coin/${coin.id}`}
-                      className="rounded-xl flex flex-col items-center justify-center p-2 cursor-pointer transition-all hover:scale-[1.03] hover:z-10 border min-h-[88px]"
+                      className="rounded-lg flex flex-col items-center justify-center p-2 cursor-pointer transition-all duration-150 hover:scale-[1.03] hover:z-10 hover:brightness-125 border min-h-[88px]"
                       style={{
                         backgroundColor: getBg(change),
                         borderColor: getBorder(change),
@@ -169,20 +169,20 @@ export default function HeatmapPage() {
                       }}
                     >
                       <span
-                        className="text-xs font-black uppercase"
+                        className="text-xs font-black uppercase tracking-wide"
                         style={{ color: getTextColor(change) }}
                       >
                         {coin.symbol}
                       </span>
                       <span
-                        className="text-[10px] font-bold mt-0.5"
+                        className="font-mono text-[10px] font-bold mt-0.5 tabular-nums"
                         style={{ color: getTextColor(change), opacity: 0.8 }}
                       >
                         {formatPrice(coin.current_price)}
                       </span>
                       <span
-                        className="text-[9px] font-black mt-0.5"
-                        style={{ color: getTextColor(change), opacity: 0.9 }}
+                        className="font-mono text-[10px] font-black mt-0.5 tabular-nums"
+                        style={{ color: getTextColor(change), opacity: 0.95 }}
                       >
                         {change != null
                           ? (change >= 0 ? "+" : "") + change.toFixed(1) + "%"

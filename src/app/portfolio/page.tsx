@@ -218,38 +218,38 @@ export default function PortfolioPage() {
 
         {/* Summary */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-          <div className="glass-card">
-            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1">
+          <div className="glass-card hover:border-outline-variant transition-colors">
+            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1.5">
               Market Value
             </div>
-            <div className="text-xl font-black">{fmt(totals.value)}</div>
+            <div className="font-mono text-xl font-black tabular-nums">{fmt(totals.value)}</div>
           </div>
-          <div className="glass-card">
-            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1">
+          <div className="glass-card hover:border-outline-variant transition-colors">
+            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1.5">
               Cost Basis
             </div>
-            <div className="text-xl font-black">{fmt(totals.cost)}</div>
+            <div className="font-mono text-xl font-black tabular-nums text-on-surface-variant">{fmt(totals.cost)}</div>
           </div>
-          <div className="glass-card">
-            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1">
+          <div className={`glass-card transition-colors ${totals.pnl >= 0 ? "border-bullish-green/25" : "border-bearish-red/25"}`}>
+            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1.5">
               Total P&amp;L
             </div>
             <div
-              className={`text-xl font-black ${
-                totals.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+              className={`font-mono text-xl font-black tabular-nums ${
+                totals.pnl >= 0 ? "text-bullish-green" : "text-bearish-red"
               }`}
             >
               {totals.pnl >= 0 ? "+" : ""}
               {fmt(totals.pnl)}
             </div>
           </div>
-          <div className="glass-card">
-            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1">
+          <div className={`glass-card transition-colors ${totals.pnlPercent >= 0 ? "border-bullish-green/25" : "border-bearish-red/25"}`}>
+            <div className="text-[10px] font-black uppercase tracking-widest text-text-secondary mb-1.5">
               Return
             </div>
             <div
-              className={`text-xl font-black ${
-                totals.pnlPercent >= 0 ? "text-emerald-400" : "text-red-400"
+              className={`font-mono text-xl font-black tabular-nums ${
+                totals.pnlPercent >= 0 ? "text-bullish-green" : "text-bearish-red"
               }`}
             >
               {totals.pnlPercent >= 0 ? "+" : ""}
@@ -289,7 +289,7 @@ export default function PortfolioPage() {
             <select
               value={coinId}
               onChange={(e) => setCoinId(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
               {coinList.map((c) => (
                 <option key={c.id} value={c.id} className="bg-bg-dark">
@@ -304,7 +304,7 @@ export default function PortfolioPage() {
               placeholder="Amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             />
             <input
               type="number"
@@ -313,7 +313,7 @@ export default function PortfolioPage() {
               placeholder="Avg cost (USD)"
               value={avgCost}
               onChange={(e) => setAvgCost(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             />
             <button
               onClick={handleAdd}
@@ -325,10 +325,10 @@ export default function PortfolioPage() {
         </div>
 
         {/* Holdings table */}
-        <div className="glass-card overflow-x-auto">
+        <div className="glass-card !p-0 overflow-x-auto">
           <table className="w-full text-left min-w-[760px]">
             <thead>
-              <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-text-secondary">
+              <tr className="border-b border-outline-variant/60 text-[10px] font-black uppercase tracking-widest text-text-secondary bg-surface-container-low/60">
                 <th className="px-4 py-4">Coin</th>
                 <th className="px-4 py-4">Amount</th>
                 <th className="px-4 py-4">Avg Cost</th>
@@ -353,7 +353,7 @@ export default function PortfolioPage() {
                 rows.map((r) => (
                   <tr
                     key={r.id}
-                    className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                    className="border-b border-outline-variant/30 hover:bg-surface-container-high/40 transition-colors"
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
@@ -366,20 +366,20 @@ export default function PortfolioPage() {
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-4 text-sm font-bold">{r.amount}</td>
-                    <td className="px-4 py-4 text-sm font-bold text-text-secondary">
+                    <td className="px-4 py-4 font-mono text-sm font-bold tabular-nums">{r.amount}</td>
+                    <td className="px-4 py-4 font-mono text-sm font-semibold tabular-nums text-text-secondary">
                       {fmt(r.avgCost)}
                     </td>
-                    <td className="px-4 py-4 text-sm font-bold">
+                    <td className="px-4 py-4 font-mono text-sm font-bold tabular-nums">
                       {fmt(r.livePrice)}
                     </td>
                     <td className="px-4 py-4">
                       {r.change24h != null ? (
                         <span
-                          className={`text-xs font-black ${
+                          className={`font-mono text-xs font-black tabular-nums ${
                             r.change24h >= 0
-                              ? "text-emerald-400"
-                              : "text-red-400"
+                              ? "text-bullish-green"
+                              : "text-bearish-red"
                           }`}
                         >
                           {r.change24h >= 0 ? "+" : ""}
@@ -389,14 +389,14 @@ export default function PortfolioPage() {
                         "—"
                       )}
                     </td>
-                    <td className="px-4 py-4 text-sm font-bold">
+                    <td className="px-4 py-4 font-mono text-sm font-bold tabular-nums">
                       {fmt(r.marketValue)}
                     </td>
                     <td className="px-4 py-4">
                       {r.pnl != null ? (
                         <span
-                          className={`text-sm font-black ${
-                            r.pnl >= 0 ? "text-emerald-400" : "text-red-400"
+                          className={`font-mono text-sm font-black tabular-nums ${
+                            r.pnl >= 0 ? "text-bullish-green" : "text-bearish-red"
                           }`}
                         >
                           {r.pnl >= 0 ? "+" : ""}
@@ -418,7 +418,7 @@ export default function PortfolioPage() {
                           removeHolding(r.id);
                           toast("Holding removed", "info");
                         }}
-                        className="text-white/20 hover:text-red-400 transition-colors"
+                        className="text-on-surface-variant/40 hover:text-bearish-red transition-colors"
                         aria-label="Remove holding"
                       >
                         <Trash2 className="w-4 h-4" />

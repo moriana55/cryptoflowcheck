@@ -138,7 +138,7 @@ export function CFCAssistant() {
   return (
     <div className="fixed bottom-8 right-8 z-[200]">
       {isOpen ? (
-        <div className="w-[380px] h-[500px] glass-panel !rounded-2xl shadow-[0_20px_80px_rgba(142,209,223,0.1)] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-300">
+        <div className="w-[380px] h-[500px] glass-panel !rounded-2xl shadow-[0_20px_80px_rgba(34, 211, 238,0.1)] flex flex-col overflow-hidden animate-in fade-in slide-in-from-bottom-8 duration-300">
           <div className="p-5 border-b border-outline-variant/20 bg-surface-container-low flex justify-between items-center shrink-0">
             <div className="flex items-center gap-3">
               <div className="p-2 bg-primary/20 rounded-lg">
@@ -215,7 +215,7 @@ export function CFCAssistant() {
       ) : (
         <button
           onClick={() => setIsOpen(true)}
-          className="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(142,209,223,0.3)] hover:scale-105 active:scale-95 transition-all group relative"
+          className="w-14 h-14 bg-primary text-on-primary rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(34, 211, 238,0.3)] hover:scale-105 active:scale-95 transition-all group relative"
         >
           <MessageSquare className="w-6 h-6 relative z-10" />
         </button>

@@ -32,7 +32,7 @@ function ExchangeDropdown({ value, onChange, accent = "cyan" }: { value: string;
         <ChevronDown className={`w-4 h-4 text-text-secondary transition-transform ${open ? "rotate-180" : ""}`} />
       </button>
       {open && (
-        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-[#1a1d2e] border border-white/10 rounded-2xl overflow-hidden shadow-2xl shadow-black/40 backdrop-blur-xl">
+        <div className="absolute z-50 top-full left-0 right-0 mt-2 bg-surface-container-high border border-outline-variant/60 rounded-xl overflow-hidden shadow-2xl shadow-black/50 backdrop-blur-xl">
           {EXCHANGES.map(e => (
             <button
               key={e.id}
@@ -68,7 +68,7 @@ export default function ExchangesPage() {
       <SiteHeader />
 
       <main className="container mx-auto px-6 py-12">
-        <div className="mb-10">
+        <div className="mb-10 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">
             Exchange <span className="text-gradient">Arena</span>
           </h1>
@@ -116,7 +116,7 @@ export default function ExchangesPage() {
           {EXCHANGES.map((exchange) => (
             <div
               key={exchange.id}
-              className="glass-card group hover:border-accent-cyan/30 transition-all duration-500"
+              className="glass-card group hover:border-accent-cyan/40 hover:-translate-y-0.5 transition-all duration-300"
             >
               <div className="flex items-start justify-between mb-6">
                 <div className="flex items-center gap-3">
@@ -133,7 +133,7 @@ export default function ExchangesPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <div className="text-2xl font-black text-accent-cyan">
+                  <div className="font-mono text-2xl font-black text-accent-cyan tabular-nums">
                     {exchange.overallRating}
                   </div>
                   <div className="text-[9px] font-bold text-text-secondary uppercase">

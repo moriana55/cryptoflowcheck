@@ -182,7 +182,7 @@ export function CompareTable({ coinA, coinB, loading }: CompareTableProps) {
             </div>
             <div className="hidden sm:flex w-8 items-center justify-center">
               {row.winner && (
-                <div className={`w-1.5 h-1.5 rounded-full ${row.winner === "A" ? "bg-accent-cyan shadow-[0_0_6px_#00F2FF]" : "bg-accent-purple shadow-[0_0_6px_#9D00FF]"}`} />
+                <div className={`w-1.5 h-1.5 rounded-full ${row.winner === "A" ? "bg-accent-cyan shadow-[0_0_6px_#22d3ee]" : "bg-accent-purple shadow-[0_0_6px_#a5b4fc]"}`} />
               )}
             </div>
             <div className={`text-center font-bold text-sm ${row.winner === "B" ? "text-accent-purple" : "text-white"}`}>

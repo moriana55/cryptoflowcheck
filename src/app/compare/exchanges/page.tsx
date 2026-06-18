@@ -90,7 +90,7 @@ function CompareContent() {
           <div
             className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mx-auto mb-4 border-2 ${
               aWins && !isTie
-                ? "bg-accent-cyan/10 border-accent-cyan text-accent-cyan shadow-[0_0_30px_rgba(0,242,255,0.15)]"
+                ? "bg-accent-cyan/10 border-accent-cyan text-accent-cyan shadow-[0_0_30px_rgba(34,211,238,0.15)]"
                 : "bg-white/5 border-white/10 text-white"
             }`}
           >
@@ -130,7 +130,7 @@ function CompareContent() {
           <div
             className={`w-20 h-20 rounded-2xl flex items-center justify-center text-3xl font-black mx-auto mb-4 border-2 ${
               !aWins && !isTie
-                ? "bg-accent-purple/10 border-accent-purple text-accent-purple shadow-[0_0_30px_rgba(157,0,255,0.15)]"
+                ? "bg-accent-purple/10 border-accent-purple text-accent-purple shadow-[0_0_30px_rgba(165,180,252,0.15)]"
                 : "bg-white/5 border-white/10 text-white"
             }`}
           >

@@ -82,7 +82,7 @@ export function CoinSelector({ selected, onSelect, accent, label }: CoinSelector
       <button
         onClick={() => setOpen(!open)}
         className={`w-full flex items-center gap-3 px-5 py-4 rounded-2xl border-2 transition-all bg-bg-card ${
-          open ? `border-${accentColor} shadow-[0_0_30px_rgba(${accent === "cyan" ? "0,242,255" : "157,0,255"},0.15)]` : "border-white/10 hover:border-white/20"
+          open ? `border-${accentColor} shadow-[0_0_30px_rgba(${accent === "cyan" ? "34,211,238" : "165,180,252"},0.15)]` : "border-white/10 hover:border-white/20"
         }`}
       >
         {selected?.symbol && <CoinLogo symbol={selected.symbol} size={28} />}

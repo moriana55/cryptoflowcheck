@@ -128,7 +128,7 @@ export default function AlertsPage() {
       <SiteHeader />
 
       <main className="container mx-auto px-6 py-12">
-        <div className="mb-8">
+        <div className="mb-8 animate-fade-in">
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2 flex items-center gap-3">
             <Bell className="w-7 h-7 text-accent-cyan" />
             <span>
@@ -180,7 +180,7 @@ export default function AlertsPage() {
             <select
               value={coinId}
               onChange={(e) => setCoinId(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
               {coinList.map((c) => (
                 <option key={c.id} value={c.id} className="bg-bg-dark">
@@ -191,7 +191,7 @@ export default function AlertsPage() {
             <select
               value={metric}
               onChange={(e) => setMetric(e.target.value as WatchMetric)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
               <option value="price" className="bg-bg-dark">
                 Price (USD)
@@ -206,7 +206,7 @@ export default function AlertsPage() {
             <select
               value={direction}
               onChange={(e) => setDirection(e.target.value as WatchDirection)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
               <option value="above" className="bg-bg-dark">
                 Above
@@ -221,7 +221,7 @@ export default function AlertsPage() {
               placeholder="Threshold"
               value={threshold}
               onChange={(e) => setThreshold(e.target.value)}
-              className="bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30"
+              className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             />
             <button
               onClick={handleAdd}
@@ -248,10 +248,10 @@ export default function AlertsPage() {
         </div>
 
         {/* Watch list */}
-        <div className="glass-card overflow-x-auto">
+        <div className="glass-card !p-0 overflow-x-auto">
           <table className="w-full text-left min-w-[680px]">
             <thead>
-              <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-text-secondary">
+              <tr className="border-b border-outline-variant/60 text-[10px] font-black uppercase tracking-widest text-text-secondary bg-surface-container-low/60">
                 <th className="px-4 py-4">Coin</th>
                 <th className="px-4 py-4">Metric</th>
                 <th className="px-4 py-4">Condition</th>
@@ -274,7 +274,7 @@ export default function AlertsPage() {
                 evaluated.map((w) => (
                   <tr
                     key={w.id}
-                    className="border-b border-white/5 hover:bg-white/[0.02] transition-colors"
+                    className="border-b border-outline-variant/30 hover:bg-surface-container-high/40 transition-colors"
                   >
                     <td className="px-4 py-4">
                       <div className="flex items-center gap-3">
@@ -313,7 +313,7 @@ export default function AlertsPage() {
                           removeWatch(w.id);
                           toast("Watch removed", "info");
                         }}
-                        className="text-white/20 hover:text-red-400 transition-colors"
+                        className="text-on-surface-variant/40 hover:text-bearish-red transition-colors"
                         aria-label="Remove watch"
                       >
                         <Trash2 className="w-4 h-4" />

@@ -113,7 +113,13 @@ export default function MarketsPage() {
       <SiteHeader />
 
       <main className="container mx-auto px-6 py-12">
-        <div className="mb-10">
+        <div className="mb-10 animate-fade-in">
+          <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded-full border border-primary/20 bg-primary/5">
+            <span className="pulse-dot text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+              Live · Binance
+            </span>
+          </div>
           <h1 className="text-3xl sm:text-4xl font-black tracking-tight mb-2">
             Markets <span className="text-gradient">Overview</span>
           </h1>
@@ -122,18 +128,16 @@ export default function MarketsPage() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 mb-8">
-          <div className="glass-card flex-1">
-            <div className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-text-secondary" />
-              <input
-                type="text"
-                placeholder="Search coins by name or symbol..."
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full bg-transparent border-none rounded-2xl pl-12 pr-4 py-3 text-sm font-bold outline-none"
-              />
-            </div>
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 mb-8">
+          <div className="relative flex-1">
+            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-text-secondary pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search coins by name or symbol..."
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="w-full bg-surface-container/70 border border-outline-variant/60 rounded-xl pl-11 pr-4 py-3 text-sm font-semibold outline-none placeholder:text-text-secondary/60 focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
+            />
           </div>
           <div className="flex items-center gap-2">
             <button
@@ -159,54 +163,47 @@ export default function MarketsPage() {
           </div>
         </div>
 
-        <div className="glass-card overflow-x-auto relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-[#07090F] after:to-transparent after:pointer-events-none md:after:hidden">
+        <div className="glass-card !p-0 overflow-x-auto relative after:absolute after:right-0 after:top-0 after:bottom-0 after:w-8 after:bg-gradient-to-l after:from-bg-card after:to-transparent after:pointer-events-none md:after:hidden">
           <table className="w-full text-left min-w-[900px]">
             <thead>
-              <tr className="border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-text-secondary">
-                <th className="px-4 py-4 w-10"></th>
-                <th className="px-4 py-4 w-12">#</th>
-                <th className="px-4 py-4">Coin</th>
-                <th
-                  className="px-4 py-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("current_price")}
-                >
-                  <span className="flex items-center gap-1">
-                    Price <ArrowUpDown className="w-3 h-3" />
-                  </span>
-                </th>
-                <th
-                  className="px-4 py-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("price_change_percentage_24h")}
-                >
-                  <span className="flex items-center gap-1">
-                    24h % <ArrowUpDown className="w-3 h-3" />
-                  </span>
-                </th>
-                <th
-                  className="px-4 py-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("market_cap")}
-                >
-                  <span className="flex items-center gap-1">
-                    Market Cap <ArrowUpDown className="w-3 h-3" />
-                  </span>
-                </th>
-                <th
-                  className="px-4 py-4 cursor-pointer hover:text-white transition-colors select-none"
-                  onClick={() => toggleSort("total_volume")}
-                >
-                  <span className="flex items-center gap-1">
-                    Volume <ArrowUpDown className="w-3 h-3" />
-                  </span>
-                </th>
-                <th className="px-4 py-4 text-right">Action</th>
+              <tr className="border-b border-outline-variant/60 text-[10px] font-black uppercase tracking-widest text-text-secondary bg-surface-container-low/60 sticky top-0 z-10 backdrop-blur-sm">
+                <th className="px-4 py-3.5 w-10"></th>
+                <th className="px-4 py-3.5 w-12">#</th>
+                <th className="px-4 py-3.5">Coin</th>
+                {(
+                  [
+                    ["current_price", "Price"],
+                    ["price_change_percentage_24h", "24h %"],
+                    ["market_cap", "Market Cap"],
+                    ["total_volume", "Volume"],
+                  ] as [SortKey, string][]
+                ).map(([key, label]) => (
+                  <th
+                    key={key}
+                    className={`px-4 py-3.5 cursor-pointer transition-colors select-none hover:text-on-surface ${
+                      sortKey === key ? "text-accent-cyan" : ""
+                    }`}
+                    onClick={() => toggleSort(key)}
+                  >
+                    <span className="flex items-center gap-1">
+                      {label}
+                      <ArrowUpDown
+                        className={`w-3 h-3 transition-opacity ${
+                          sortKey === key ? "opacity-100" : "opacity-40"
+                        }`}
+                      />
+                    </span>
+                  </th>
+                ))}
+                <th className="px-4 py-3.5 text-right">Action</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
-                Array.from({ length: 8 }).map((_, i) => (
-                  <tr key={i} className="border-b border-white/5">
-                    <td colSpan={8} className="px-6 py-5">
-                      <div className="h-4 bg-white/5 rounded animate-pulse w-full" />
+                Array.from({ length: 10 }).map((_, i) => (
+                  <tr key={i} className="border-b border-outline-variant/30">
+                    <td colSpan={8} className="px-6 py-[18px]">
+                      <div className="h-4 skeleton rounded w-full" />
                     </td>
                   </tr>
                 ))
@@ -225,7 +222,7 @@ export default function MarketsPage() {
                   return (
                     <tr
                       key={coin.id}
-                      className={`border-b border-white/5 hover:bg-white/[0.02] transition-colors ${
+                      className={`border-b border-outline-variant/30 hover:bg-surface-container-high/40 transition-colors ${
                         liveData.direction === "up"
                           ? "flash-up"
                           : liveData.direction === "down"
@@ -233,13 +230,14 @@ export default function MarketsPage() {
                           : ""
                       }`}
                     >
-                      <td className="px-4 py-5">
+                      <td className="px-4 py-4">
                         <button
                           onClick={() => handleStar(coin.id)}
+                          aria-label={isWatched ? "Remove from watchlist" : "Add to watchlist"}
                           className={`transition-colors ${
                             isWatched
                               ? "text-amber-400"
-                              : "text-white/10 hover:text-amber-400/50"
+                              : "text-on-surface-variant/30 hover:text-amber-400/70"
                           }`}
                         >
                           <Star
@@ -248,15 +246,15 @@ export default function MarketsPage() {
                           />
                         </button>
                       </td>
-                      <td className="px-4 py-5 text-xs font-bold text-text-secondary">
+                      <td className="px-4 py-4 font-mono text-xs font-bold text-text-secondary">
                         {i + 1}
                       </td>
-                      <td className="px-4 py-5">
+                      <td className="px-4 py-4">
                         <Link
                           href={`/coin/${coin.id}`}
                           className="flex items-center gap-3 group"
                         >
-                          <CoinLogo symbol={coin.symbol} size={36} />
+                          <CoinLogo symbol={coin.symbol} size={32} />
                           <div>
                             <div className="text-sm font-bold group-hover:text-accent-cyan transition-colors">
                               {coin.name}
@@ -267,16 +265,16 @@ export default function MarketsPage() {
                           </div>
                         </Link>
                       </td>
-                      <td className="px-4 py-5 text-sm font-bold">
+                      <td className="px-4 py-4 font-mono text-sm font-bold text-on-surface">
                         {formatPrice(liveData.price)}
                       </td>
-                      <td className="px-4 py-5">
+                      <td className="px-4 py-4">
                         {liveData.change != null ? (
                           <span
-                            className={`text-xs font-black ${
+                            className={`inline-flex font-mono text-xs font-black tabular-nums ${
                               liveData.change >= 0
-                                ? "text-emerald-400"
-                                : "text-red-400"
+                                ? "text-bullish-green"
+                                : "text-bearish-red"
                             }`}
                           >
                             {liveData.change >= 0 ? "+" : ""}
@@ -288,17 +286,17 @@ export default function MarketsPage() {
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-5 text-sm font-bold text-text-secondary">
+                      <td className="px-4 py-4 font-mono text-sm font-semibold text-on-surface-variant">
                         {formatCurrency(coin.market_cap)}
                       </td>
-                      <td className="px-4 py-5 text-sm font-bold text-text-secondary">
+                      <td className="px-4 py-4 font-mono text-sm font-semibold text-on-surface-variant">
                         {formatCurrency(coin.total_volume)}
                       </td>
-                      <td className="px-4 py-5 text-right">
+                      <td className="px-4 py-4 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <Link
                             href={`/compare?a=${coin.id}&b=ethereum`}
-                            className="px-3 py-1.5 bg-white/5 border border-white/10 rounded-lg text-[10px] font-black uppercase tracking-wider hover:bg-accent-cyan/10 hover:border-accent-cyan/30 hover:text-accent-cyan transition-all"
+                            className="px-3 py-1.5 bg-surface-container-high border border-outline-variant/60 rounded-lg text-[10px] font-black uppercase tracking-wider text-on-surface-variant hover:bg-accent-cyan/10 hover:border-accent-cyan/30 hover:text-accent-cyan transition-all"
                           >
                             VS
                           </Link>

@@ -14,8 +14,8 @@ export function VitalSigns({ totalMarketCap, btcDominance, marketCapChange24h, a
       sub: marketCapChange24h != null
         ? `${marketCapChange24h >= 0 ? "+" : ""}${marketCapChange24h.toFixed(2)}% (24h)`
         : null,
-      subColor: marketCapChange24h != null && marketCapChange24h >= 0 ? "text-primary" : "text-error",
-      borderColor: "border-primary-container",
+      subColor: "",
+      borderColor: "border-primary",
     },
     {
       label: "BTC DOMINANCE",
@@ -42,21 +42,21 @@ export function VitalSigns({ totalMarketCap, btcDominance, marketCapChange24h, a
   ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack-md mb-stack-lg">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-stack-md mb-stack-lg animate-fade-in">
       {signs.map((sign, i) => (
         <div
           key={i}
-          className={`glass-panel p-stack-md rounded-xl border-l-4 ${sign.borderColor} shadow-lg`}
+          className={`glass-panel p-stack-md rounded-xl border-l-4 ${sign.borderColor} hover:border-l-4 hover:-translate-y-0.5 transition-transform`}
         >
           <p className="font-geist text-label-md text-on-surface-variant mb-2">{sign.label}</p>
-          <h2 className={`font-geist text-headline-sm ${
-            i === 0 ? "text-primary" : i === 1 ? "text-secondary" : i === 2 ? (avgChange != null && avgChange >= 0 ? "text-primary" : "text-error") : "text-tertiary"
+          <h2 className={`font-geist text-headline-sm font-bold tabular-nums ${
+            i === 0 ? "text-primary" : i === 1 ? "text-secondary" : i === 2 ? (avgChange != null && avgChange >= 0 ? "text-bullish-green" : "text-bearish-red") : "text-tertiary"
           } mb-1`}>
             {sign.value}
           </h2>
           {sign.sub && (
-            <p className={`font-mono text-sm ${sign.subColor} ${
-              i === 2 ? "" : i === 0 ? "bg-error/10 inline-block px-1 rounded" : i === 3 ? "bg-tertiary/10 inline-block px-2 py-0.5 rounded font-geist text-xs font-bold" : ""
+            <p className={`font-mono text-sm tabular-nums ${sign.subColor} ${
+              i === 0 ? (marketCapChange24h != null && marketCapChange24h >= 0 ? "text-bullish-green bg-bullish-green/10" : "text-bearish-red bg-error/10") + " inline-block px-1.5 rounded" : i === 3 ? "bg-tertiary/10 inline-block px-2 py-0.5 rounded font-geist text-xs font-bold" : ""
             }`}>
               {sign.sub}
             </p>

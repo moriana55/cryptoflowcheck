@@ -3,42 +3,105 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    color-scheme: dark;
+  }
+
+  html {
+    scrollbar-gutter: stable;
+  }
+
   body {
-    background-color: #0b1326;
-    color: #dae2fd;
+    /* Crypto terminal base: deep midnight with a faint vertical lift so the
+       background never reads as flat black. */
+    background-color: #0a0f1e;
+    background-image:
+      radial-gradient(1200px 600px at 50% -10%, rgba(34, 211, 238, 0.06), transparent 70%),
+      linear-gradient(180deg, #0a0f1e 0%, #080c18 100%);
+    background-attachment: fixed;
+    color: #e6ecf7;
     font-family: "Manrope", system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Numeric data reads as a clean terminal grid: monospaced figures keep
+     prices and percentages vertically aligned. */
+  table,
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  /* Crisp, on-brand focus ring for keyboard users across the whole app. */
+  :focus-visible {
+    outline: 2px solid rgba(34, 211, 238, 0.7);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Themed, slim scrollbars to match the terminal aesthetic. */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #283248 transparent;
+  }
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #1f2a42;
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #2c3a58;
+    background-clip: content-box;
   }
 }
 
 @layer components {
+  /* Solid, low-noise cards — a real trading terminal favours crisp panels
+     over heavy frosted glass, so the blur is subtle and the surface opaque
+     enough to keep dense data legible. */
   .glass-panel {
-    background: rgba(23, 31, 51, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(137, 146, 149, 0.1);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, rgba(23, 32, 51, 0.72) 0%, rgba(17, 24, 40, 0.72) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(40, 50, 72, 0.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.4);
     border-radius: 0.75rem;
     padding: 1rem;
     position: relative;
     overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .glass-card {
-    background: rgba(23, 31, 51, 0.6);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(137, 146, 149, 0.1);
-    box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.05);
+    background: linear-gradient(180deg, rgba(23, 32, 51, 0.72) 0%, rgba(17, 24, 40, 0.72) 100%);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(40, 50, 72, 0.8);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.04),
+      0 1px 2px rgba(0, 0, 0, 0.4);
     border-radius: 0.75rem;
     padding: 1.5rem;
     position: relative;
     overflow: hidden;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
   }
 
   .text-gradient {
-    background: linear-gradient(135deg, #8ed1df 0%, #b7c8e1 100%);
+    background: linear-gradient(120deg, #22d3ee 0%, #a5b4fc 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
   }
 
@@ -47,9 +110,9 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.4rem 0.8rem;
-    background: rgba(142, 209, 223, 0.1);
-    border: 1px solid rgba(142, 209, 223, 0.3);
-    color: #8ed1df;
+    background: rgba(34, 211, 238, 0.1);
+    border: 1px solid rgba(34, 211, 238, 0.3);
+    color: #22d3ee;
     border-radius: 4px;
     font-size: 10px;
     font-weight: 700;
@@ -66,15 +129,35 @@
   }
 
   .glow-primary {
-    box-shadow: 0 0 15px rgba(142, 209, 223, 0.3);
+    box-shadow: 0 0 16px rgba(34, 211, 238, 0.35);
   }
 
   .glow-secondary {
-    box-shadow: 0 0 15px rgba(183, 200, 225, 0.4);
+    box-shadow: 0 0 16px rgba(165, 180, 252, 0.4);
   }
 
   .gauge-glow {
-    filter: drop-shadow(0 0 5px #be8453);
+    filter: drop-shadow(0 0 6px rgba(251, 191, 36, 0.6));
+  }
+
+  /* Subtle moving sheen for skeleton loaders. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background: rgba(31, 42, 66, 0.5);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(255, 255, 255, 0.06),
+      transparent
+    );
+    animation: shimmer 1.6s infinite;
   }
 }
 
@@ -83,13 +166,17 @@
   50% { opacity: .5; }
 }
 
+@keyframes shimmer {
+  100% { transform: translateX(100%); }
+}
+
 @keyframes flash-up {
-  0% { background-color: rgba(142, 209, 223, 0.25); }
+  0% { background-color: rgba(52, 211, 153, 0.22); }
   100% { background-color: transparent; }
 }
 
 @keyframes flash-down {
-  0% { background-color: rgba(255, 180, 171, 0.25); }
+  0% { background-color: rgba(248, 113, 113, 0.22); }
   100% { background-color: transparent; }
 }
 
@@ -99,4 +186,14 @@
 
 .flash-down {
   animation: flash-down 0.6s ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
