@@ -11,6 +11,8 @@ export interface Coin {
 
 export interface GlobalMarketData {
   total_market_cap: number;
-  btc_dominance: number;
+  // null when only an unreliable estimate is available (e.g. CoinGecko down);
+  // the UI renders this as "—" instead of a misleading number.
+  btc_dominance: number | null;
   market_cap_change_24h: number;
 }

@@ -26,9 +26,48 @@ export function rateLimit(
   return { success: true, limit: maxRequests, remaining: maxRequests - entry.count };
 }
 
+/** Strict-ish IPv4 / IPv6 shape check so a spoofed header can't inject an
+ *  arbitrary string (or a wildcard) into a rate-limit key. */
+function isValidIP(ip: string): boolean {
+  if (!ip || ip.length > 45) return false;
+  // IPv4
+  if (/^\d{1,3}(\.\d{1,3}){3}$/.test(ip)) {
+    return ip.split(".").every((o) => Number(o) <= 255);
+  }
+  // IPv6 (loose but bounded: only hex groups + colons, must contain a colon)
+  return /^[0-9a-fA-F:]+$/.test(ip) && ip.includes(":");
+}
+
+/**
+ * Resolve the client IP used for rate-limit keys.
+ *
+ * The raw `x-forwarded-for` header is client-controlled and trivially spoofable,
+ * which would let an attacker forge a fresh IP per request and bypass limits.
+ * On Vercel (this app's host) the platform sets `x-real-ip` from the actual TCP
+ * connection — that is the trustworthy source — and appends the real client IP
+ * as the LAST entry of `x-forwarded-for`. We therefore:
+ *   1. Prefer `x-real-ip` (platform-set, not spoofable via request body).
+ *   2. Fall back to the last `x-forwarded-for` entry (Vercel-appended real IP),
+ *      not the first (which a client can prepend).
+ * Every candidate is validated as a real IP shape before use; anything else
+ * collapses to "unknown" so forged garbage can't fragment the key space.
+ */
 export function getClientIP(req: Request): string {
+  const realIP = req.headers.get("x-real-ip")?.trim();
+  if (realIP && isValidIP(realIP)) return realIP;
+
   const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
+  if (forwarded) {
+    const parts = forwarded
+      .split(",")
+      .map((p) => p.trim())
+      .filter(Boolean);
+    // Last entry is the one appended by the trusted proxy (Vercel); the leading
+    // entries can be forged by the client.
+    const candidate = parts[parts.length - 1];
+    if (candidate && isValidIP(candidate)) return candidate;
+  }
+
   return "unknown";
 }
 

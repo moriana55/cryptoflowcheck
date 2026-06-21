@@ -7,6 +7,13 @@ export interface CoinMeta {
   category: string;
 }
 
+// NOTE: `circulatingSupply` below is a STATIC, hand-maintained approximation
+// captured at a point in time. It drifts as tokens are minted/burned/unlocked,
+// so any market_cap derived from it (see src/lib/binance.ts) is an estimate
+// only and grows less accurate over time. The live CoinGecko `/global` endpoint
+// is the source of truth for total market cap and BTC dominance; these figures
+// are used as inputs for per-coin display and as a last-resort fallback.
+// TODO: pull live circulating supply per coin from CoinGecko to replace this.
 export const DEFAULT_COIN_MAP: Record<string, CoinMeta> = {
   bitcoin: { symbol: "btc", name: "Bitcoin", pair: "BTCUSDT", maxSupply: 21000000, circulatingSupply: 19800000, category: "LAYER 1" },
   ethereum: { symbol: "eth", name: "Ethereum", pair: "ETHUSDT", maxSupply: null, circulatingSupply: 120690000, category: "LAYER 1" },

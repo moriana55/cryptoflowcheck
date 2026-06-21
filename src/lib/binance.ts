@@ -242,7 +242,9 @@ export async function fetchFearGreed(): Promise<{ value: number; classification:
 
 export interface GlobalMarketData {
   total_market_cap: number;
-  btc_dominance: number;
+  // null when only an unreliable estimate is available (CoinGecko down); the UI
+  // renders this as "—" rather than a misleading number.
+  btc_dominance: number | null;
   market_cap_change_24h: number;
 }
 
@@ -269,19 +271,24 @@ export async function fetchGlobalMarketData(
       };
     }
 
-    // Fallback: calculate from tracked coins if CoinGecko is down
+    // Fallback: CoinGecko is down. We estimate from the tracked coins only.
+    // CAVEAT: per-coin market_cap here is derived from STATIC circulatingSupply
+    // figures in src/lib/coins.ts, which drift out of date over time, and we
+    // only cover ~40 coins (not the whole market). So:
+    //   - total_market_cap is a LOWER BOUND (most of the market is missing), and
+    //   - a naive BTC dominance over this subset would be badly OVERSTATED
+    //     because the denominator excludes thousands of other assets.
+    // To avoid showing a misleadingly high dominance number, we report
+    // btc_dominance as null ("—" in the UI) in the fallback rather than a wrong
+    // value. The live CoinGecko path above remains the source of truth.
     const data = await fetchBinanceCoins(coins);
     const totalMcap = data.reduce((sum, c) => sum + (c.market_cap ?? 0), 0);
-    const btcCoin = data.find((c) => c.id === "bitcoin");
-    const btcDominance = btcCoin?.market_cap && totalMcap > 0
-      ? (btcCoin.market_cap / totalMcap) * 100
-      : 0;
     const avgChange = data.length > 0
       ? data.reduce((sum, c) => sum + (c.price_change_percentage_24h ?? 0), 0) / data.length
       : 0;
     return {
       total_market_cap: totalMcap,
-      btc_dominance: btcDominance,
+      btc_dominance: null,
       market_cap_change_24h: avgChange,
     };
   } catch {

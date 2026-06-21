@@ -21,7 +21,14 @@ function isAIConfigured(): boolean {
 let _openai: OpenAI | null = null;
 function getOpenAI(): OpenAI {
   if (!_openai) {
-    _openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+    // The SDK default request timeout is 10 minutes, long enough to hang a cron
+    // or admin action on a stalled completion. Cap it (with one retry) so these
+    // paths fail fast instead of blocking the worker.
+    _openai = new OpenAI({
+      apiKey: process.env.OPENAI_API_KEY,
+      timeout: 60_000,
+      maxRetries: 1,
+    });
   }
   return _openai;
 }
@@ -81,10 +88,22 @@ async function enforceAIQuota(action: string) {
   recordAIQuery();
 }
 
+/** fetch with an AbortController timeout so cron/admin paths can't hang on a
+ *  slow upstream. Defaults to 8s to match the rest of the codebase. */
+async function fetchWithTimeout(url: string, timeoutMs = 8000): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function fetchLiveMarketContext() {
   try {
     const [tickerRes, fgRes] = await Promise.all([
-      fetch(
+      fetchWithTimeout(
         "https://api.binance.com/api/v3/ticker/24hr?symbols=" +
           encodeURIComponent(
             JSON.stringify([
@@ -101,7 +120,7 @@ async function fetchLiveMarketContext() {
             ])
           )
       ),
-      fetch("https://api.alternative.me/fng/?limit=1"),
+      fetchWithTimeout("https://api.alternative.me/fng/?limit=1"),
     ]);
 
     const tickers = tickerRes.ok
@@ -247,7 +266,7 @@ export async function generateCompareInsight(coinA: string, coinB: string) {
 
 async function fetchBinanceUSDTPairs(): Promise<{ symbol: string; quoteVolume: string; priceChangePercent: string }[]> {
   try {
-    const res = await fetch("https://api.binance.com/api/v3/ticker/24hr");
+    const res = await fetchWithTimeout("https://api.binance.com/api/v3/ticker/24hr");
     if (!res.ok) return [];
     const data: Array<{ symbol: string; quoteVolume: string; priceChangePercent: string }> = await res.json();
     return data
