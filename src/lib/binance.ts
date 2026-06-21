@@ -68,9 +68,13 @@ export async function fetchBinanceCoins(
       lastPrice: string;
       priceChangePercent: string;
       volume: string;
+      quoteVolume: string;
     }
 
-    const tickers: Ticker[] = await res.json();
+    const raw = await res.json();
+    // Binance can return HTTP 200 with an error envelope ({code, msg}) instead
+    // of the expected array — guard against it so we fall back cleanly.
+    const tickers: Ticker[] = Array.isArray(raw) ? raw : [];
     const tickerMap = new Map(tickers.map((t) => [t.symbol, t]));
 
     return coins.map((c, i) => {
@@ -83,7 +87,10 @@ export async function fetchBinanceCoins(
         market_cap_rank: i + 1,
         current_price: t ? Number(t.lastPrice) : null,
         market_cap: c.circulatingSupply && t ? Number(t.lastPrice) * c.circulatingSupply : null,
-        total_volume: t ? Number(t.volume) : null,
+        // quoteVolume is the USD-denominated 24h volume (volume = base-asset
+        // units). UI shows this as a currency, so use quoteVolume to stay
+        // consistent with the coin detail page.
+        total_volume: t ? Number(t.quoteVolume) : null,
         price_change_percentage_24h: t ? Number(t.priceChangePercent) : null,
         category: c.category,
       };
@@ -121,7 +128,11 @@ export async function fetchBinanceCoinDetail(
     if (!tickerRes.ok) return { error: "Binance API error" };
 
     const ticker = await tickerRes.json();
-    const currentPrice = Number(ticker.lastPrice);
+    const currentPrice = Number(ticker?.lastPrice);
+    // Binance can return HTTP 200 with an error envelope ({code, msg}) for an
+    // invalid symbol — lastPrice is then undefined, yielding NaN. Treat as error
+    // so the UI shows "not found" instead of "$NaN".
+    if (!Number.isFinite(currentPrice)) return { error: "Coin not found" };
 
     let pct7d: number | null = null;
     let pct30d: number | null = null;

@@ -19,12 +19,16 @@ const PAIRS = [
 ];
 
 function formatPrice(price: number): string {
+  if (!Number.isFinite(price)) return "—";
   if (price >= 1000)
     return "$" + price.toLocaleString("en-US", { maximumFractionDigits: 0 });
   if (price >= 1)
     return "$" + price.toLocaleString("en-US", { maximumFractionDigits: 2 });
   if (price >= 0.001) return "$" + price.toFixed(4);
-  return "$" + price.toPrecision(2);
+  if (price <= 0) return "$0";
+  // Sub-cent memecoins (e.g. 0.00000001): avoid scientific notation by showing
+  // enough decimals to surface the first significant digits.
+  return "$" + price.toFixed(10).replace(/0+$/, "");
 }
 
 export function PriceTicker() {

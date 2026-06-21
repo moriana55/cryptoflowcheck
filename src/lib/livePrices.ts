@@ -27,15 +27,24 @@ function connect() {
     ws = new WebSocket(getStreamsUrl());
 
     ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
+      let data: unknown;
+      try {
+        data = JSON.parse(event.data);
+      } catch {
+        // Binance may send non-JSON control frames (ping/pong, errors).
+        return;
+      }
       // Handle both single object and array (combined stream)
       const items = Array.isArray(data) ? data : [data];
 
       let updated = false;
       for (const item of items) {
-        const pair = item.s as string;
-        const price = Number(item.c);
-        const change24h = Number(item.P);
+        if (!item || typeof item !== "object") continue;
+        const pair = (item as any).s as string;
+        const price = Number((item as any).c);
+        const change24h = Number((item as any).P);
+        // Skip malformed entries (control messages, missing fields).
+        if (!pair || !Number.isFinite(price)) continue;
 
         const prev = prevPrices[pair];
         let direction: Direction = "neutral";

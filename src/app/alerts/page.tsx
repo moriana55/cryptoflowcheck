@@ -112,13 +112,13 @@ export default function AlertsPage() {
   function metricLabel(m: WatchMetric) {
     if (m === "price") return "Price (USD)";
     if (m === "change24h") return "24h Change (%)";
-    return "24h Volume (units)";
+    return "24h Volume (USD)";
   }
 
   function fmtValue(m: WatchMetric, v: number | null) {
     if (v == null) return "—";
     if (m === "change24h") return `${v >= 0 ? "+" : ""}${v.toFixed(2)}%`;
-    if (m === "volume") return v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+    if (m === "volume") return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 0 });
     return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 4 });
   }
 

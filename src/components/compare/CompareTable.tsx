@@ -29,13 +29,17 @@ interface CompareTableProps {
 }
 
 function formatNum(n: number | undefined | null, opts?: { style?: string; currency?: string; maximumFractionDigits?: number; minimumFractionDigits?: number }) {
-  if (n == null) return "—";
+  if (n == null || !Number.isFinite(n)) return "—";
   if (opts?.style === "currency") {
+    if (n >= 1_000_000_000_000) return "$" + (n / 1_000_000_000_000).toFixed(2) + "T";
     if (n >= 1_000_000_000) return "$" + (n / 1_000_000_000).toFixed(2) + "B";
     if (n >= 1_000_000) return "$" + (n / 1_000_000).toFixed(2) + "M";
     if (n >= 1) return "$" + n.toLocaleString("en-US", { maximumFractionDigits: 2 });
-    return "$" + n.toPrecision(4);
+    if (n <= 0) return "$0";
+    // Sub-cent values: avoid scientific notation from toPrecision.
+    return "$" + n.toFixed(10).replace(/0+$/, "");
   }
+  if (n >= 1_000_000_000_000) return (n / 1_000_000_000_000).toFixed(2) + "T";
   if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(2) + "B";
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(2) + "M";
   return n.toLocaleString("en-US", { maximumFractionDigits: opts?.maximumFractionDigits ?? 2 });

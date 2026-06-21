@@ -36,8 +36,14 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
     if (!res.ok) return { error: "Wallet not found" };
 
     const data = await res.json();
-    const balanceWei = BigInt(data.coin_balance || "0");
-    const balanceETH = Number(balanceWei) / 1e18;
+    let balanceETH = 0;
+    try {
+      balanceETH = Number(BigInt(data.coin_balance || "0")) / 1e18;
+    } catch {
+      // Unexpected balance format — treat as zero rather than failing the wallet.
+      balanceETH = 0;
+    }
+    if (!Number.isFinite(balanceETH)) balanceETH = 0;
     const ethPrice = data.exchange_rate ? Number(data.exchange_rate) : null;
 
     return {

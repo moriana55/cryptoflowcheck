@@ -11,10 +11,15 @@ function shortenAddr(addr: string) {
 }
 
 function formatETH(weiStr: string) {
-  const eth = Number(BigInt(weiStr)) / 1e18;
-  if (eth === 0) return "0 ETH";
+  let eth: number;
+  try {
+    eth = Number(BigInt(weiStr || "0")) / 1e18;
+  } catch {
+    // Malformed value (null/decimal/non-numeric) — fail soft instead of crashing.
+    return "0 ETH";
+  }
+  if (!Number.isFinite(eth) || eth === 0) return "0 ETH";
   if (eth < 0.0001) return "<0.0001 ETH";
-  if (eth < 1) return eth.toFixed(4) + " ETH";
   return eth.toFixed(4) + " ETH";
 }
 

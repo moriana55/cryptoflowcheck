@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PLANS, isStripeConfigured } from "@/lib/stripe";
+import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -8,6 +9,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Payments are not enabled on this server yet." },
       { status: 503 }
+    );
+  }
+
+  // Prevent unauthenticated abuse of paid Stripe session creation.
+  const limit = rateLimit(`checkout:${getClientIP(request)}`, 10, 60_000);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many requests. Please try again shortly." },
+      { status: 429 }
     );
   }
 

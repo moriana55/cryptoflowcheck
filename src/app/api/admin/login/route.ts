@@ -1,7 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import { issueAdminToken, ADMIN_COOKIE } from "@/lib/adminAuth";
+import { rateLimit, getClientIP } from "@/lib/rateLimit";
 
 export const dynamic = "force-dynamic";
+
+/** Constant-time equality for equal-length hex digests (avoids timing leak). */
+function timingSafeEqual(a: string, b: string): boolean {
+  if (a.length !== b.length) return false;
+  let diff = 0;
+  for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  return diff === 0;
+}
 
 // SHA-256 of the legacy password ("CryptoFlow2025!"). Used only as a fallback
 // when ADMIN_PASSWORD_HASH is not set so the panel keeps working out of the box.
@@ -16,6 +25,15 @@ async function sha256(value: string): Promise<string> {
 }
 
 export async function POST(request: NextRequest) {
+  // Throttle brute-force / offline-guess attempts against the admin password.
+  const limit = rateLimit(`admin-login:${getClientIP(request)}`, 5, 60_000);
+  if (!limit.success) {
+    return NextResponse.json(
+      { error: "Too many attempts. Please try again later." },
+      { status: 429 }
+    );
+  }
+
   // Fail-closed: without a signing secret we cannot mint a tamper-proof token.
   const token = await issueAdminToken();
   if (!token) {
@@ -34,7 +52,7 @@ export async function POST(request: NextRequest) {
   }
 
   const expectedHash = process.env.ADMIN_PASSWORD_HASH || DEFAULT_PASSWORD_HASH;
-  if ((await sha256(password)) !== expectedHash) {
+  if (!timingSafeEqual(await sha256(password), expectedHash)) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }
 
