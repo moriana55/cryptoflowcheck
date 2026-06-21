@@ -26,10 +26,12 @@ function timeAgo(ts: string) {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-function formatTokenBalance(value: string, decimals: number) {
+function formatTokenBalance(value: string, decimals: string | number | null) {
   if (!value || value === "0") return "0";
   try {
-    const num = Number(BigInt(value)) / Math.pow(10, decimals || 18);
+    const d = Number(decimals);
+    const safeDecimals = Number.isFinite(d) && d >= 0 ? d : 18;
+    const num = Number(BigInt(value)) / Math.pow(10, safeDecimals);
     if (num < 0.0001) return "<0.0001";
     if (num < 1) return num.toFixed(4);
     if (num < 1000) return num.toFixed(2);
@@ -51,9 +53,13 @@ export default function WalletClient({ balance, transactions, tokens }: Props) {
   const isLower = addr.toLowerCase();
 
   function copyAddress() {
-    navigator.clipboard.writeText(addr);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      navigator.clipboard?.writeText(addr);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable (insecure origin / denied) — ignore silently
+    }
   }
 
   return (
@@ -158,7 +164,7 @@ export default function WalletClient({ balance, transactions, tokens }: Props) {
                     </div>
                     <div className="text-right">
                       <span className="font-mono text-xs text-on-surface font-bold">
-                        {formatTokenBalance(t.value, 18)}
+                        {formatTokenBalance(t.value, t.token.decimals)}
                       </span>
                       <a href={`https://etherscan.io/token/${t.token.address}?a=${addr}`} target="_blank" rel="noopener noreferrer" className="block text-primary text-[10px] font-geist font-bold hover:underline mt-0.5">
                         VIEW

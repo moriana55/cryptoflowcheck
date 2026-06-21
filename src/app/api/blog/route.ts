@@ -16,12 +16,21 @@ export async function GET() {
   return NextResponse.json(posts);
 }
 
+async function readJson(request: NextRequest): Promise<any> {
+  try {
+    return await request.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: NextRequest) {
   if (!(await isAuthed(request))) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await readJson(request);
+  if (!body) return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   const post = {
     id: randomUUID(),
     slug: body.slug || "untitled",
@@ -41,7 +50,8 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const body = await request.json();
+  const body = await readJson(request);
+  if (!body) return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   if (!body.id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
 
   saveServerBlogPost({
@@ -61,7 +71,8 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  const { id } = await request.json();
+  const parsed = await readJson(request);
+  const id = parsed?.id;
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
   deleteServerBlogPost(id);
   return NextResponse.json({ success: true });

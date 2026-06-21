@@ -27,7 +27,7 @@ export function CoinLogo({ symbol, size = 36, className = "" }: CoinLogoProps) {
     // eslint-disable-next-line @next/next/no-img-element
     <img
       src={`https://raw.githubusercontent.com/spothq/cryptocurrency-icons/master/128/color/${s}.png`}
-      alt={symbol}
+      alt={`${symbol.toUpperCase()} logo`}
       className={`rounded-full object-cover shrink-0 ${className}`}
       style={{ width: size, height: size }}
       onError={() => setError(true)}

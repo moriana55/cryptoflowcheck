@@ -210,13 +210,21 @@ export async function fetchBinanceChart(
 }
 
 export async function fetchFearGreed(): Promise<{ value: number; classification: string; timestamp?: string } | { error: string }> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
   try {
-    const res = await fetch("https://api.alternative.me/fng/?limit=1", { next: { revalidate: 3600 } as any });
+    const res = await fetch("https://api.alternative.me/fng/?limit=1", {
+      signal: controller.signal,
+      next: { revalidate: 3600 } as any,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return { error: "API error" };
     const data = await res.json();
     const item = data.data?.[0];
     if (!item) return { error: "No data" };
     return { value: Number(item.value), classification: item.value_classification, timestamp: item.timestamp };
   } catch {
+    clearTimeout(timeout);
     return { error: "API error" };
   }
 }

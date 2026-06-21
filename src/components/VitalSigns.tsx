@@ -65,7 +65,7 @@ export function VitalSigns({ totalMarketCap, btcDominance, marketCapChange24h, a
             <div className="h-3 w-full bg-surface-container-highest rounded-full overflow-hidden mt-3 relative">
               <div
                 className="h-full bg-secondary glow-secondary absolute left-0 top-0 transition-all duration-1000"
-                style={{ width: `${sign.barValue}%` }}
+                style={{ width: `${Math.max(0, Math.min(100, sign.barValue))}%` }}
               />
             </div>
           )}

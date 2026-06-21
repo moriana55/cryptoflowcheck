@@ -23,6 +23,7 @@ export interface WalletToken {
     name: string;
     symbol: string;
     type: string;
+    decimals: string | null;
   };
   value: string;
 }
@@ -40,7 +41,7 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
     const ethPrice = data.exchange_rate ? Number(data.exchange_rate) : null;
 
     return {
-      address: data.hash,
+      address: data.hash || address,
       balanceETH,
       balanceUSD: ethPrice ? balanceETH * ethPrice : null,
       ensName: data.ens_domain_name || null,

@@ -90,9 +90,12 @@ export default function CoinDetailClient() {
     const coinMeta = map[id];
     if (!coinMeta) return;
 
+    let cancelled = false;
+    let observer: ResizeObserver | null = null;
+
     fetchBinanceChart(coinMeta.pair, days)
       .then((prices) => {
-        if (!prices.length || !chartRef.current) return;
+        if (cancelled || !prices.length || !chartRef.current) return;
 
         if (chartInstance.current) {
           chartInstance.current.remove();
@@ -151,15 +154,25 @@ export default function CoinDetailClient() {
         chart.timeScale().fitContent();
         chartInstance.current = chart;
 
-        const observer = new ResizeObserver((entries) => {
+        observer = new ResizeObserver((entries) => {
           for (const entry of entries) {
             chart.applyOptions({ width: entry.contentRect.width });
           }
         });
         if (chartRef.current) observer.observe(chartRef.current);
-
-        return () => observer.disconnect();
+      })
+      .catch(() => {
+        // chart fetch failed; leave the chart area empty rather than crashing
       });
+
+    return () => {
+      cancelled = true;
+      if (observer) observer.disconnect();
+      if (chartInstance.current) {
+        chartInstance.current.remove();
+        chartInstance.current = null;
+      }
+    };
   }, [id, days]);
 
   const timeframes = [

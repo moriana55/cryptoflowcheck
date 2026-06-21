@@ -30,17 +30,23 @@ export default function MarketsPage() {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [watchFilter, setWatchFilter] = useState<"all" | "watchlist">("all");
   const [watchlist, setWatchlist] = useState<string[]>([]);
+  const [loadError, setLoadError] = useState(false);
   const live = useLivePrices();
 
   useEffect(() => {
     setWatchlist(getWatchlist());
     const list = getCoinList();
+    const pairById = new Map(list.map((c) => [c.id, c.pair]));
     fetchBinanceCoins(list)
       .then((data) => {
-        setCoins(data.map((c, i) => ({ ...c, pair: list[i]?.pair || "" })));
+        setCoins(data.map((c) => ({ ...c, pair: pairById.get(c.id) || "" })));
+        setLoadError(false);
         setLoading(false);
       })
-      .catch(() => setLoading(false));
+      .catch(() => {
+        setLoadError(true);
+        setLoading(false);
+      });
   }, []);
 
   function toggleSort(key: SortKey) {
@@ -210,7 +216,9 @@ export default function MarketsPage() {
               ) : filtered.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-6 py-12 text-center text-sm font-bold text-text-secondary">
-                    {watchFilter === "watchlist"
+                    {loadError && coins.length === 0
+                      ? "Could not load market data. The price feed may be temporarily unavailable — please try again shortly."
+                      : watchFilter === "watchlist"
                       ? "Your watchlist is empty. Star some coins to add them here."
                       : "No coins found matching your search."}
                   </td>
