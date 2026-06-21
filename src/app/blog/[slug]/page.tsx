@@ -1,33 +1,53 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { getBlogPostBySlug, type BlogPost } from "@/lib/admin";
+import type { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { getServerBlogBySlug } from "@/lib/blog-store";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteStructure";
 import { PriceTicker } from "@/components/PriceTicker";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 
-export default function BlogDetailPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const [post, setPost] = useState<BlogPost | null>(null);
+// Server-render from the shared store so AI-generated posts are visible to all
+// visitors and indexable/shareable (real OG + canonical) by crawlers.
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    if (slug) setPost(getBlogPostBySlug(slug) ?? null);
-  }, [slug]);
+interface Props {
+  params: Promise<{ slug: string }>;
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { slug } = await params;
+  const post = getServerBlogBySlug(slug);
 
   if (!post) {
-    return (
-      <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center">
-        <h2 className="text-xl font-black text-text-secondary mb-4">Post not found</h2>
-        <Link
-          href="/blog"
-          className="px-6 py-2 bg-accent-cyan text-bg-dark font-black text-xs uppercase tracking-widest rounded-xl"
-        >
-          Back to Blog
-        </Link>
-      </div>
-    );
+    return { title: "Post Not Found | CryptoFlowCheck" };
+  }
+
+  return {
+    title: `${post.title} | CryptoFlowCheck`,
+    description: post.excerpt || `${post.title} — analysis from the CryptoFlowCheck intelligence desk.`,
+    alternates: { canonical: `/blog/${post.slug}` },
+    openGraph: {
+      title: post.title,
+      description: post.excerpt || post.title,
+      type: "article",
+      url: `/blog/${post.slug}`,
+      publishedTime: post.date,
+      tags: post.tags,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt || post.title,
+    },
+  };
+}
+
+export default async function BlogDetailPage({ params }: Props) {
+  const { slug } = await params;
+  const post = getServerBlogBySlug(slug);
+
+  if (!post) {
+    notFound();
   }
 
   return (

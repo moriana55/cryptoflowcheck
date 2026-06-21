@@ -7,7 +7,7 @@ import { CoinSelector } from "@/components/compare/CoinSelector";
 import { CompareTable } from "@/components/compare/CompareTable";
 import { ArrowLeftRight, Zap, FileText, Sparkles } from "lucide-react";
 import Link from "next/link";
-import { getBlogPosts, type BlogPost } from "@/lib/admin";
+import { type BlogPost } from "@/lib/admin";
 import { generateCompareInsight } from "@/lib/ai";
 import { CoinLogo } from "@/components/CoinLogo";
 import { fetchBinanceCoinDetail } from "@/lib/binance";
@@ -130,16 +130,34 @@ function CompareContent() {
   }
 
   useEffect(() => {
-    if (!detailA && !detailB) return;
-    const posts = getBlogPosts();
-    const ids = [detailA?.id, detailB?.id].filter(Boolean) as string[];
-    const syms = [detailA?.symbol, detailB?.symbol].filter(Boolean).map((s) => s?.toLowerCase()) as string[];
-    const related = posts.filter((p) => {
-      const lower = (p.title + " " + p.content + " " + p.tags.join(" ")).toLowerCase();
-      return ids.some((id) => lower.includes(id.toLowerCase())) || syms.some((sym) => lower.includes(sym));
-    });
-    setRelatedPosts(related);
+    if (!detailA && !detailB) {
+      setRelatedPosts([]);
+      return;
+    }
+    let cancelled = false;
+    // Pull from the shared server blog store (same source the public /blog pages
+    // and the daily AI cron use) — visitor localStorage is always empty here.
+    fetch("/api/blog")
+      .then((r) => (r.ok ? r.json() : []))
+      .then((posts: BlogPost[]) => {
+        if (cancelled || !Array.isArray(posts)) return;
+        const ids = [detailA?.id, detailB?.id].filter(Boolean) as string[];
+        const syms = [detailA?.symbol, detailB?.symbol]
+          .filter(Boolean)
+          .map((s) => s?.toLowerCase()) as string[];
+        const related = posts.filter((p) => {
+          const lower = (p.title + " " + p.content + " " + (p.tags || []).join(" ")).toLowerCase();
+          return ids.some((id) => lower.includes(id.toLowerCase())) || syms.some((sym) => lower.includes(sym));
+        });
+        setRelatedPosts(related);
+      })
+      .catch(() => {
+        if (!cancelled) setRelatedPosts([]);
+      });
     setAiInsight(null);
+    return () => {
+      cancelled = true;
+    };
   }, [detailA, detailB]);
 
   return (

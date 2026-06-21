@@ -1,18 +1,30 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { getBlogPosts, type BlogPost } from "@/lib/admin";
+import type { Metadata } from "next";
+import { getServerBlogPosts } from "@/lib/blog-store";
 import Link from "next/link";
 import { SiteHeader } from "@/components/SiteStructure";
 import { PriceTicker } from "@/components/PriceTicker";
 import { ArrowLeft, Calendar, Tag } from "lucide-react";
 
-export default function BlogListPage() {
-  const [posts, setPosts] = useState<BlogPost[]>([]);
+// Always render from the server-side store so AI-generated posts (written by the
+// daily cron) are visible to every visitor and crawlable by search engines.
+export const dynamic = "force-dynamic";
 
-  useEffect(() => {
-    setPosts(getBlogPosts());
-  }, []);
+export const metadata: Metadata = {
+  title: "Crypto Market Analysis & On-Chain Intelligence Blog | CryptoFlowCheck",
+  description:
+    "Expert crypto market analysis, whale flow tracking, and on-chain intelligence from the CryptoFlowCheck research desk. Updated regularly.",
+  alternates: { canonical: "/blog" },
+  openGraph: {
+    title: "Crypto Market Analysis Blog | CryptoFlowCheck",
+    description:
+      "Expert crypto market analysis and on-chain intelligence from the CryptoFlowCheck research desk.",
+    type: "website",
+    url: "/blog",
+  },
+};
+
+export default function BlogListPage() {
+  const posts = getServerBlogPosts();
 
   return (
     <div className="min-h-screen bg-bg-dark">
