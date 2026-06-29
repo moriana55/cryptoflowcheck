@@ -1,5 +1,24 @@
 const BLOCKSCOUT = "https://eth.blockscout.com/api/v2";
 
+/**
+ * fetch with an AbortController timeout so a stalled Blockscout upstream can't
+ * hang the (force-dynamic) wallet page render. Mirrors the 8s timeout pattern
+ * used across the rest of the codebase (binance.ts, ai.ts).
+ */
+async function fetchWithTimeout(
+  url: string,
+  init: RequestInit = {},
+  timeoutMs = 8000
+): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    return await fetch(url, { ...init, signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export interface WalletBalance {
   address: string;
   balanceETH: number;
@@ -30,7 +49,7 @@ export interface WalletToken {
 
 export async function fetchWalletBalance(address: string): Promise<WalletBalance | { error: string }> {
   try {
-    const res = await fetch(`${BLOCKSCOUT}/addresses/${address}`, {
+    const res = await fetchWithTimeout(`${BLOCKSCOUT}/addresses/${address}`, {
       next: { revalidate: 30 } as any,
     });
     if (!res.ok) return { error: "Wallet not found" };
@@ -59,7 +78,7 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
 
 export async function fetchWalletTransactions(address: string): Promise<WalletTx[]> {
   try {
-    const res = await fetch(`${BLOCKSCOUT}/addresses/${address}/transactions?limit=20`, {
+    const res = await fetchWithTimeout(`${BLOCKSCOUT}/addresses/${address}/transactions?limit=20`, {
       next: { revalidate: 30 } as any,
     });
     if (!res.ok) return [];
@@ -72,7 +91,7 @@ export async function fetchWalletTransactions(address: string): Promise<WalletTx
 
 export async function fetchWalletTokens(address: string): Promise<WalletToken[]> {
   try {
-    const res = await fetch(`${BLOCKSCOUT}/addresses/${address}/token-balances`, {
+    const res = await fetchWithTimeout(`${BLOCKSCOUT}/addresses/${address}/token-balances`, {
       next: { revalidate: 60 } as any,
     });
     if (!res.ok) return [];
