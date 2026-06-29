@@ -5,6 +5,14 @@ import { getRequestTier, DAILY_AI_QUERY_LIMIT } from "@/lib/tier";
 import { consumeDailyQuota, getClientIP } from "@/lib/rateLimit";
 import { recordAIQuery, recordVisit } from "@/lib/metrics";
 import { headers } from "next/headers";
+import {
+  BRIEFING_SYSTEM_PROMPT,
+  buildBriefingPrompt,
+  fallbackBriefing,
+  parseBriefingResponse,
+  type DailyBriefing,
+  type MarketSnapshot,
+} from "@/lib/briefing";
 
 /**
  * Prompt version. Bump this string whenever a prompt below changes so cached
@@ -402,5 +410,152 @@ Return ONLY the JSON object.`,
       tags: ["Crypto", "AI", "Analysis"],
       focusKeyword: "crypto",
     };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Daily Market Briefing
+//
+// Once-per-day, market-wide briefing built from live Binance + Fear & Greed
+// data. The result is cached globally for the UTC day (same aiAnalysisCache as
+// the compare insight), so at most ONE OpenAI call happens per day per variant
+// — the AI cost stays negligible and the generic briefing is free to all users.
+// Pure prompt/parse/fallback logic lives in src/lib/briefing.ts.
+// ---------------------------------------------------------------------------
+
+const BRIEFING_SYMBOLS = [
+  "BTCUSDT",
+  "ETHUSDT",
+  "SOLUSDT",
+  "BNBUSDT",
+  "XRPUSDT",
+  "DOGEUSDT",
+  "ADAUSDT",
+  "AVAXUSDT",
+  "LINKUSDT",
+  "DOTUSDT",
+];
+
+/** Fetch a structured live snapshot. Returns an empty-coins snapshot (never
+ *  throws) so the briefing can fall back deterministically on any upstream
+ *  failure. */
+async function fetchMarketSnapshot(day: string): Promise<MarketSnapshot> {
+  try {
+    const [tickerRes, fgRes] = await Promise.all([
+      fetchWithTimeout(
+        "https://api.binance.com/api/v3/ticker/24hr?symbols=" +
+          encodeURIComponent(JSON.stringify(BRIEFING_SYMBOLS))
+      ),
+      fetchWithTimeout("https://api.alternative.me/fng/?limit=1"),
+    ]);
+
+    const rawTickers = tickerRes.ok ? await tickerRes.json() : [];
+    const tickers: Array<{ symbol: string; lastPrice: string; priceChangePercent: string; quoteVolume: string }> =
+      Array.isArray(rawTickers) ? rawTickers : [];
+
+    const coins = tickers
+      .map((t) => ({
+        symbol: String(t.symbol).replace("USDT", ""),
+        price: Number(t.lastPrice),
+        change24h: Number(t.priceChangePercent),
+        volumeUSD: Number(t.quoteVolume),
+      }))
+      .filter((c) => Number.isFinite(c.price) && Number.isFinite(c.change24h));
+
+    let fearGreed: MarketSnapshot["fearGreed"] = null;
+    if (fgRes.ok) {
+      const fg = await fgRes.json();
+      const item = fg?.data?.[0];
+      if (item && Number.isFinite(Number(item.value))) {
+        fearGreed = {
+          value: Number(item.value),
+          classification: String(item.value_classification ?? "Unknown"),
+        };
+      }
+    }
+
+    const totalVolumeUSD = coins.reduce(
+      (sum, c) => sum + (Number.isFinite(c.volumeUSD) ? c.volumeUSD : 0),
+      0
+    );
+
+    return { day, coins, fearGreed, totalVolumeUSD };
+  } catch (err) {
+    console.error("[AI Briefing] snapshot fetch failed:", err);
+    return { day, coins: [], fearGreed: null, totalVolumeUSD: 0 };
+  }
+}
+
+/**
+ * Produce today's market briefing.
+ *
+ * - Generic (no args) version is cached once per UTC day and served free to
+ *   everyone.
+ * - `focusSymbols` enables a lightly personalized variant, but ONLY for Pro
+ *   users (verified server-side via getRequestTier); for free/anon callers the
+ *   focus is ignored and the generic briefing is returned. The personalized
+ *   variant is still cached per distinct symbol-set per day, so AI cost stays
+ *   bounded.
+ * - Always resolves to a DailyBriefing (deterministic fallback when OpenAI is
+ *   unconfigured, the call fails, or live data is missing) — never throws.
+ */
+export async function generateDailyBriefing(opts?: {
+  focusSymbols?: string[];
+}): Promise<DailyBriefing> {
+  const day = utcDay();
+
+  // Personalization is a Pro feature; gate it server-side.
+  let focus: string[] = [];
+  const requested = (opts?.focusSymbols ?? [])
+    .map((s) => String(s).trim().toUpperCase())
+    .filter(Boolean);
+  if (requested.length > 0) {
+    try {
+      const { tier } = await getRequestTier();
+      if (tier === "pro") {
+        focus = Array.from(new Set(requested)).sort().slice(0, 12);
+      }
+    } catch {
+      focus = [];
+    }
+  }
+
+  const cacheKey = `briefing:${PROMPT_VERSION}:${day}:${focus.join(",") || "generic"}`;
+  const cached = readCache(cacheKey);
+  if (cached) {
+    try {
+      return JSON.parse(cached) as DailyBriefing;
+    } catch {
+      // Corrupt cache entry — fall through and regenerate.
+    }
+  }
+
+  const snapshot = await fetchMarketSnapshot(day);
+
+  // No key or no data -> deterministic fallback. Intentionally NOT cached so a
+  // later request the same day can still produce the real AI briefing once the
+  // key/data is available.
+  if (!isAIConfigured() || snapshot.coins.length === 0) {
+    return fallbackBriefing(snapshot, new Date().toISOString(), focus);
+  }
+
+  try {
+    const completion = await getOpenAI().chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: BRIEFING_SYSTEM_PROMPT },
+        { role: "user", content: buildBriefingPrompt(snapshot, focus) },
+      ],
+      temperature: 0.6,
+    });
+
+    const raw = completion.choices[0].message.content || "";
+    const briefing = parseBriefingResponse(raw, snapshot, new Date().toISOString(), focus);
+    // Only cache a genuine AI result; fallbacks stay uncached so they can recover.
+    if (briefing.source === "ai") writeCache(cacheKey, JSON.stringify(briefing));
+    return briefing;
+  } catch (err) {
+    console.error("[AI Briefing] generation failed:", err);
+    return fallbackBriefing(snapshot, new Date().toISOString(), focus);
   }
 }
