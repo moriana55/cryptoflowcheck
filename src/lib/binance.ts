@@ -295,3 +295,61 @@ export async function fetchGlobalMarketData(
     return { error: "Network error" };
   }
 }
+
+/** Current spot price for a pair (e.g. "ETHUSDT"), or null on any failure. */
+export async function fetchSpotPrice(pair: string): Promise<number | null> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  try {
+    const res = await fetch(`${BINANCE_BASE}/ticker/price?symbol=${pair}`, {
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+    if (!res.ok) return null;
+    const json = await res.json();
+    const price = Number(json?.price);
+    return Number.isFinite(price) ? price : null;
+  } catch {
+    clearTimeout(timeout);
+    return null;
+  }
+}
+
+/**
+ * Daily close prices for a pair keyed by UTC day ("YYYY-MM-DD"), going back
+ * ~`days` days (Binance caps a single klines call at 1000 candles). Used to
+ * value historical wallet transactions at their transaction-day price.
+ *
+ * Returns an empty Map on any failure — callers treat a missing day as
+ * "price unknown" rather than fabricating one.
+ */
+export async function fetchDailyCloseMap(
+  pair: string,
+  days: number
+): Promise<Map<string, number>> {
+  const limit = Math.min(Math.max(days, 1), 1000);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+  const map = new Map<string, number>();
+  try {
+    const res = await fetch(
+      `${BINANCE_BASE}/klines?symbol=${pair}&interval=1d&limit=${limit}`,
+      { signal: controller.signal }
+    );
+    clearTimeout(timeout);
+    if (!res.ok) return map;
+    const klines: [number, string, string, string, string, string][] = await res.json();
+    if (!Array.isArray(klines)) return map;
+    for (const k of klines) {
+      const openTime = Number(k[0]);
+      const close = Number(k[4]);
+      if (!Number.isFinite(openTime) || !Number.isFinite(close)) continue;
+      const day = new Date(openTime).toISOString().slice(0, 10);
+      map.set(day, close);
+    }
+    return map;
+  } catch {
+    clearTimeout(timeout);
+    return map;
+  }
+}

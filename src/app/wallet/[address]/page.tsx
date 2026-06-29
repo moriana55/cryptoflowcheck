@@ -2,6 +2,8 @@ import { fetchWalletBalance, fetchWalletTransactions, fetchWalletTokens, isEthAd
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import WalletClient from "./WalletClient";
+import { getRequestTier } from "@/lib/tier";
+import { computeWalletPnlReport } from "@/lib/walletPnl";
 
 export const dynamic = "force-dynamic";
 
@@ -39,5 +41,18 @@ export default async function WalletPage({ params }: Props) {
     );
   }
 
-  return <WalletClient balance={balance} transactions={transactions} tokens={tokens} />;
+  // PnL / tax report is a Pro feature: the full report is only computed and
+  // sent to the client for Pro users (server-verified). Free users get a teaser.
+  const { tier } = await getRequestTier();
+  const pnl = tier === "pro" ? await computeWalletPnlReport(address) : null;
+
+  return (
+    <WalletClient
+      balance={balance}
+      transactions={transactions}
+      tokens={tokens}
+      tier={tier}
+      pnl={pnl}
+    />
+  );
 }

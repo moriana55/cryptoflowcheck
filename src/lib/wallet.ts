@@ -76,14 +76,22 @@ export async function fetchWalletBalance(address: string): Promise<WalletBalance
   }
 }
 
-export async function fetchWalletTransactions(address: string): Promise<WalletTx[]> {
+export async function fetchWalletTransactions(
+  address: string,
+  limit = 20
+): Promise<WalletTx[]> {
+  // Blockscout returns one page (~50 native txns) per call; `limit` bounds how
+  // many we keep. Full history would require following next_page_params — the
+  // PnL report flags incomplete history rather than silently guessing.
+  const safeLimit = Math.min(Math.max(Math.trunc(limit) || 20, 1), 100);
   try {
-    const res = await fetchWithTimeout(`${BLOCKSCOUT}/addresses/${address}/transactions?limit=20`, {
+    const res = await fetchWithTimeout(`${BLOCKSCOUT}/addresses/${address}/transactions`, {
       next: { revalidate: 30 } as any,
     });
     if (!res.ok) return [];
     const data = await res.json();
-    return data.items || [];
+    const items: WalletTx[] = Array.isArray(data.items) ? data.items : [];
+    return items.slice(0, safeLimit);
   } catch {
     return [];
   }
