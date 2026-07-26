@@ -137,6 +137,7 @@ export default function PricingPage() {
               <input
                 type="email"
                 placeholder="your@email.com"
+                aria-label="Email address for Pro subscription"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/30 transition-colors"

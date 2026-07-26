@@ -233,9 +233,9 @@ export default function CoinDetailClient() {
         <div className="w-64 h-1 bg-white/5 rounded-full overflow-hidden mb-4 relative">
           <div className="absolute inset-0 bg-accent-cyan animate-[marquee_1.5s_infinite]"></div>
         </div>
-        <h2 className="text-gradient font-black text-xl tracking-[0.2em] animate-pulse uppercase">
+        <h1 className="text-gradient font-black text-xl tracking-[0.2em] animate-pulse uppercase">
           Loading coin data...
-        </h2>
+        </h1>
       </div>
     );
   }
@@ -243,7 +243,7 @@ export default function CoinDetailClient() {
   if (!coin) {
     return (
       <div className="min-h-screen bg-bg-dark flex flex-col items-center justify-center px-6 text-center">
-        <h2 className="text-2xl font-black text-white mb-4">Coin not found</h2>
+        <h1 className="text-2xl font-black text-white mb-4">Coin not found</h1>
         <Link
           href="/markets"
           className="px-8 py-3 bg-accent-cyan text-bg-dark font-black text-xs uppercase tracking-widest rounded-2xl hover:scale-105 transition-all"

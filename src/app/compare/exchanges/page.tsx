@@ -323,6 +323,7 @@ export default function CompareExchangesPage() {
       <PriceTicker />
       <SiteHeader />
       <main className="container mx-auto px-6 py-12">
+        <h1 className="sr-only">Cryptocurrency Exchange Comparison</h1>
         <Link
           href="/exchanges"
           className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-white transition-colors mb-6"

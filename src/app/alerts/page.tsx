@@ -179,6 +179,7 @@ export default function AlertsPage() {
           <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
             <select
               value={coinId}
+              aria-label="Cryptocurrency"
               onChange={(e) => setCoinId(e.target.value)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
@@ -190,6 +191,7 @@ export default function AlertsPage() {
             </select>
             <select
               value={metric}
+              aria-label="Alert metric"
               onChange={(e) => setMetric(e.target.value as WatchMetric)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
@@ -205,6 +207,7 @@ export default function AlertsPage() {
             </select>
             <select
               value={direction}
+              aria-label="Alert direction"
               onChange={(e) => setDirection(e.target.value as WatchDirection)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
@@ -219,6 +222,7 @@ export default function AlertsPage() {
               type="number"
               step="any"
               placeholder="Threshold"
+              aria-label="Alert threshold"
               value={threshold}
               onChange={(e) => setThreshold(e.target.value)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"

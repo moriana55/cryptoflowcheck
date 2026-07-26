@@ -151,6 +151,7 @@ export default function HomeClient({ initialCoins, initialFearGreed, initialGlob
             <input
               type="text"
               placeholder="SCAN COINS / TRACK WALLET ADDRESS"
+              aria-label="Search cryptocurrencies or track a wallet address"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSearch()}

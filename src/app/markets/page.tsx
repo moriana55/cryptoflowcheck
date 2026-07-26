@@ -140,6 +140,7 @@ export default function MarketsPage() {
             <input
               type="text"
               placeholder="Search coins by name or symbol..."
+              aria-label="Search coins by name or symbol"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               className="w-full bg-surface-container/70 border border-outline-variant/60 rounded-xl pl-11 pr-4 py-3 text-sm font-semibold outline-none placeholder:text-text-secondary/60 focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"

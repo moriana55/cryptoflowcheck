@@ -27,6 +27,7 @@ export default function AdminLoginPage() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Enter password"
+          aria-label="Admin password"
           className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50"
         />
         {error && <div className="text-red-400 text-xs font-bold text-center">{error}</div>}

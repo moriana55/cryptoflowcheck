@@ -288,6 +288,7 @@ export default function PortfolioPage() {
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-3">
             <select
               value={coinId}
+              aria-label="Cryptocurrency"
               onChange={(e) => setCoinId(e.target.value)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
             >
@@ -302,6 +303,7 @@ export default function PortfolioPage() {
               min="0"
               step="any"
               placeholder="Amount"
+              aria-label="Holding amount"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
@@ -311,6 +313,7 @@ export default function PortfolioPage() {
               min="0"
               step="any"
               placeholder="Avg cost (USD)"
+              aria-label="Average cost in US dollars"
               value={avgCost}
               onChange={(e) => setAvgCost(e.target.value)}
               className="bg-surface-container/70 border border-outline-variant/60 rounded-xl px-4 py-3 text-sm font-bold outline-none focus:border-accent-cyan/50 focus:bg-surface-container transition-colors"
