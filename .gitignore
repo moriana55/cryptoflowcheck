@@ -30,6 +30,7 @@ dist
 .idea
 .vscode
 *.code-workspace
+*.tsbuildinfo
 
 # Runtime subscriber data (contains emails — never commit)
 data/subscriptions.json

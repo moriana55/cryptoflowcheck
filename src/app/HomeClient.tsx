@@ -131,6 +131,7 @@ export default function HomeClient({ initialCoins, initialFearGreed, initialGlob
       <SiteHeader />
 
       <main className="max-w-container-max mx-auto px-gutter pt-8 pb-20">
+        <h1 className="sr-only">CryptoFlowCheck On-Chain Market Intelligence</h1>
         {coins.length === 0 && (
           <div className="mb-6 glass-panel border-error/20 text-error text-xs font-bold text-center py-3">
             Could not load market data. Please refresh the page.

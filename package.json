@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "node --test \"tests/*.test.ts\""
+    "test": "node --test \"tests/*.test.ts\"",
+    "check": "npm run lint && npm test && npm run build"
   },
   "dependencies": {
     "autoprefixer": "^10.4.20",
@@ -16,10 +17,10 @@
     "jszip": "^3.10.1",
     "lightweight-charts": "^5.2.0",
     "lucide-react": "^0.460.0",
-    "next": "15.0.3",
+    "next": "^15.5.21",
     "openai": "^6.37.0",
-    "react": "^19.0.0-rc.1",
-    "react-dom": "^19.0.0-rc.1",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
     "stripe": "^22.1.1",
     "tailwind-merge": "^2.5.4"
   },
@@ -28,10 +29,10 @@
   },
   "devDependencies": {
     "@types/node": "^20.17.6",
-    "@types/react": "npm:types-react@^19.0.0-rc.1",
-    "@types/react-dom": "npm:types-react-dom@^19.0.0-rc.1",
+    "@types/react": "^19.1.0",
+    "@types/react-dom": "^19.1.0",
     "eslint": "^8",
-    "eslint-config-next": "15.0.3",
+    "eslint-config-next": "^15.5.21",
     "postcss": "^8.4.49",
     "tailwindcss": "^3.4.15",
     "typescript": "^5.6.3"
