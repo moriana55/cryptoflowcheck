@@ -5,7 +5,8 @@
  * identity is known (the `cfc-user-email` cookie set after checkout) so two
  * accounts on the same browser don't collide. Falls back to an anonymous
  * bucket otherwise. Pure code — no API keys, no server round-trip required for
- * persistence. P&L is computed live from public Binance prices supplied by the
+ * persistence. The subscription identity cookie is HTTP-only, so browser-local
+ * data remains device-scoped. P&L is computed from public Binance prices supplied by the
  * caller.
  */
 
@@ -35,7 +36,7 @@ export interface HoldingPnL extends Holding {
 
 const BASE_KEY = "cfc-portfolio";
 
-/** Read the per-browser email identity hint (also used by the tier system). */
+/** Legacy browser namespace reader; signed subscription identity is HTTP-only. */
 function currentEmail(): string {
   if (typeof document === "undefined") return "anon";
   const match = document.cookie.match(/(?:^|;\s*)cfc-user-email=([^;]+)/);

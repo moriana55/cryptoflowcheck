@@ -1,17 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { getCoinList, getCoinMap, getCustomCoins, addCustomCoin, removeCustomCoin, type CoinMeta } from "@/lib/coins";
-import { isAdmin } from "@/lib/admin";
 import { Trash2, Plus, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { findCoinsWithAI } from "@/lib/ai";
 
 export default function AdminCoinsPage() {
-  const router = useRouter();
   const [coins, setCoins] = useState(getCoinList());
-  const [custom, setCustom] = useState<Record<string, CoinMeta>>({});
+  const [custom, setCustom] = useState<Record<string, CoinMeta>>(getCustomCoins);
   const [adding, setAdding] = useState(false);
   const [aiCoins, setAiCoins] = useState<Array<{ id: string; symbol: string; name: string; pair: string; category: string; reason: string }>>([]);
   const [aiLoading, setAiLoading] = useState(false);
@@ -24,26 +21,6 @@ export default function AdminCoinsPage() {
     circulatingSupply: "",
     category: "LAYER 1",
   });
-  const [checked, setChecked] = useState(false);
-
-  useEffect(() => {
-    if (!isAdmin()) {
-      window.location.href = "/admin/login";
-    } else {
-      setCoins(getCoinList());
-      setCustom(getCustomCoins());
-    }
-    setChecked(true);
-  }, []);
-
-  if (!checked) {
-    return (
-      <div className="min-h-screen bg-bg-dark flex items-center justify-center">
-        <div className="text-[10px] font-black text-text-secondary uppercase tracking-widest animate-pulse">Checking credentials...</div>
-      </div>
-    );
-  }
-
   function handleAdd() {
     if (!form.id || !form.symbol || !form.name || !form.pair) return;
     addCustomCoin(form.id, {

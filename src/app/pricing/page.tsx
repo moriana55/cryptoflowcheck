@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { SiteHeader } from "@/components/SiteStructure";
 import { PriceTicker } from "@/components/PriceTicker";
@@ -8,7 +8,7 @@ import { Check, Zap, Crown, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 const FREE_FEATURES = [
-  "3 AI queries per day",
+  "5 AI queries per day",
   "Basic market data",
   "Top 40 coins tracking",
   "Fear & Greed index",
@@ -17,21 +17,35 @@ const FREE_FEATURES = [
 
 const PRO_FEATURES = [
   "Unlimited AI analysis",
-  "Whale alert notifications",
-  "Portfolio tracking",
-  "Priority data refresh",
-  "Custom coin alerts",
-  "Export reports (PDF/CSV)",
+  "Advanced volume watches",
+  "Local portfolio P&L",
+  "Custom threshold alerts",
+  "CSV data export",
   "AI-generated daily briefs",
-  "Early access to new features",
+  "Saved analysis history",
 ];
 
 export default function PricingPage() {
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [verified, setVerified] = useState(false);
   const searchParams = useSearchParams();
   const success = searchParams.get("success");
   const canceled = searchParams.get("canceled");
+  const sessionId = searchParams.get("session_id");
+
+  useEffect(() => {
+    if (!success || !sessionId) return;
+    const controller = new AbortController();
+    void fetch(`/api/stripe/session?session_id=${encodeURIComponent(sessionId)}`, {
+      signal: controller.signal,
+    })
+      .then((response) => {
+        if (response.ok) setVerified(true);
+      })
+      .catch(() => undefined);
+    return () => controller.abort();
+  }, [sessionId, success]);
 
   async function handleCheckout() {
     if (!email) return;
@@ -44,11 +58,6 @@ export default function PricingPage() {
       });
       const data = await res.json();
       if (data.url) {
-        // Identity hint only — tier is always re-derived server-side from the
-        // subscription store, never trusted from this cookie.
-        document.cookie = `cfc-user-email=${encodeURIComponent(
-          email.trim().toLowerCase()
-        )}; path=/; max-age=2592000; SameSite=Lax`;
         window.location.href = data.url;
       } else {
         alert(data.error || "Something went wrong");
@@ -65,7 +74,7 @@ export default function PricingPage() {
       <PriceTicker />
       <SiteHeader />
       <main className="container mx-auto px-6 py-12">
-        {success && (
+        {verified && (
           <div className="mb-8 glass-card border-emerald-400/20 text-emerald-400 text-center py-4 font-black text-sm">
             Welcome to Pro! Your subscription is active.
           </div>

@@ -1,9 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { isAdmin, logoutAdmin } from "@/lib/admin";
+import { logoutAdmin } from "@/lib/admin";
 import { LayoutDashboard, FileText, Coins, Settings, LogOut, Zap, BarChart3 } from "lucide-react";
 
 const NAV = [
@@ -18,28 +17,8 @@ const NAV = [
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    if (pathname === "/admin/login") {
-      setReady(true);
-      return;
-    }
-    if (!isAdmin()) {
-      router.push("/admin/login");
-    } else {
-      setReady(true);
-    }
-  }, [pathname, router]);
 
   if (pathname === "/admin/login") return <>{children}</>;
-  if (!ready) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center">
-        <div className="text-[10px] font-black text-gray-500 uppercase tracking-widest animate-pulse">Checking credentials...</div>
-      </div>
-    );
-  }
 
   return (
     <div className="flex min-h-screen bg-[#0a0a0f] text-gray-200">

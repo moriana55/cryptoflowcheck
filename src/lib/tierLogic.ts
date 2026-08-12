@@ -1,19 +1,16 @@
 export type Tier = "free" | "pro";
 
 /**
- * Name of the cookie holding the visitor's email once they have subscribed.
- * The cookie carries ONLY an email identity hint — the tier is always
- * re-derived from the persisted subscription store, never trusted from the
- * cookie itself.
+ * Name of the HTTP-only, HMAC-signed subscription identity cookie.
  */
 export const TIER_EMAIL_COOKIE = "cfc-user-email";
 
 /**
  * Pure tier resolution. SECURITY CRITICAL.
  *
- * The cookie supplies only the email (a hint). Whether that identity is Pro is
- * ALWAYS decided by the injected subscription-store lookup, so a forged
- * `pro=true`-style cookie can never grant Pro.
+ * The caller verifies the signed identity token before passing the email here.
+ * Whether that verified identity is Pro is still decided by the subscription
+ * store, so identity and entitlement are independent checks.
  *
  * `email` is the raw cookie value (or null). `isProInStore` is the store lookup
  * (e.g. isProSubscriber) injected so this stays free of fs/next dependencies.

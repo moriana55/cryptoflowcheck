@@ -219,9 +219,9 @@ export default function HomeClient({ initialCoins, initialFearGreed, initialGlob
             <div className="glass-panel p-3 rounded-xl flex items-center justify-between border-outline-variant/30">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-primary shadow-[0_0_8px_rgba(34,211,238,0.4)]" />
-                <span className="font-geist text-[10px] text-on-surface-variant">HYBRID SYNC: 100%</span>
+                <span className="font-geist text-[10px] text-on-surface-variant">DATA CHANNEL: BINANCE</span>
               </div>
-              <span className="font-mono text-[10px] text-primary-container">v3.4.1</span>
+              <span className="font-mono text-[10px] text-primary-container">PUBLIC API</span>
             </div>
 
             <div className="glass-panel rounded-xl overflow-hidden border-outline-variant/30 !p-0">

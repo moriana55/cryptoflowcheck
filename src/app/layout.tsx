@@ -1,24 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Manrope, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { ParticleBackground } from "@/components/ParticleBackground";
 import { Toaster } from "@/components/Toaster";
-
-const geist = Geist({
-  subsets: ["latin"],
-  variable: "--font-geist",
-});
-
-const manrope = Manrope({
-  subsets: ["latin"],
-  variable: "--font-manrope",
-});
-
-const jetbrainsMono = JetBrains_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  weight: ["500"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -28,8 +11,8 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://cryptoflowcheck.com"),
-  title: "CryptoFlowCheck | Professional On-Chain Intelligence",
-  description: "Real-time blockchain scanner, whale tracking and alpha flow signals.",
+  title: "CryptoFlowCheck | Crypto Market Intelligence",
+  description: "Public-market crypto prices, comparisons, portfolio P&L and security-conscious subscription workflows.",
   keywords: ["crypto", "bitcoin", "ethereum", "binance", "market data", "trading", "blockchain", "altcoin"],
   authors: [{ name: "CryptoFlowCheck" }],
   robots: "index, follow",
@@ -53,7 +36,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${geist.variable} ${manrope.variable} ${jetbrainsMono.variable}`}>
+    <html lang="en" className="dark">
       <body className="antialiased font-manrope relative bg-background text-on-surface">
         <ParticleBackground />
         <Toaster />

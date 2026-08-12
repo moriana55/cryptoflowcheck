@@ -18,7 +18,8 @@ const TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 export const ADMIN_COOKIE = "cfc-admin";
 
 function getSecret(): string | null {
-  return process.env.ADMIN_SECRET || null;
+  const secret = process.env.ADMIN_SECRET;
+  return secret && secret.length >= 32 ? secret : null;
 }
 
 function toHex(buffer: ArrayBuffer): string {

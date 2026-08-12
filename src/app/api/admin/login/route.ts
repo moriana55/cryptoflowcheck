@@ -12,11 +12,6 @@ function timingSafeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-// SHA-256 of the legacy password ("CryptoFlow2025!"). Used only as a fallback
-// when ADMIN_PASSWORD_HASH is not set so the panel keeps working out of the box.
-const DEFAULT_PASSWORD_HASH =
-  "c7ef050a4efd7ab8d017e803747124a745b5c9a973c91d326d3a4136df95f1cb";
-
 async function sha256(value: string): Promise<string> {
   const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(value));
   return Array.from(new Uint8Array(buf))
@@ -51,7 +46,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const expectedHash = process.env.ADMIN_PASSWORD_HASH || DEFAULT_PASSWORD_HASH;
+  const expectedHash = process.env.ADMIN_PASSWORD_HASH;
+  if (!expectedHash || !/^[a-f0-9]{64}$/i.test(expectedHash)) {
+    return NextResponse.json(
+      { error: "Admin auth is not configured (ADMIN_PASSWORD_HASH missing)." },
+      { status: 503 }
+    );
+  }
   if (!timingSafeEqual(await sha256(password), expectedHash)) {
     return NextResponse.json({ error: "Invalid password" }, { status: 401 });
   }

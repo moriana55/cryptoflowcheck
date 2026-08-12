@@ -11,9 +11,9 @@ import { resolveTier } from "../src/lib/tierLogic.ts";
 // from the subscription store via the injected lookup. The cookie value itself
 // is never trusted, so even a forged `pro=true` style cookie cannot grant Pro.
 //
-// In production getRequestTier reads the email from the cfc-user-email cookie
-// and passes it here with the real isProSubscriber store lookup; the tests
-// inject a pure store lookup so no fs/network is touched.
+// In production getRequestTier verifies the HMAC-signed cfc-user-email token,
+// then passes the recovered email here with the real isProSubscriber lookup.
+// The tests inject a pure store lookup so no fs/network is touched.
 // ---------------------------------------------------------------------------
 
 test("tier: store says pro -> pro is true (cookie email is just the hint)", () => {

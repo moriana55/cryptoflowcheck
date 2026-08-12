@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
           quantity: 1,
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://cryptoflowcheck.com"}/pricing?success=true`,
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://cryptoflowcheck.com"}/pricing?success=true&session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL || "https://cryptoflowcheck.com"}/pricing?canceled=true`,
       metadata: {
         plan: "pro",
@@ -46,7 +46,10 @@ export async function POST(request: NextRequest) {
     });
 
     return NextResponse.json({ url: session.url });
-  } catch (err: any) {
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (err: unknown) {
+    return NextResponse.json(
+      { error: err instanceof Error ? err.message : "Checkout failed" },
+      { status: 500 }
+    );
   }
 }

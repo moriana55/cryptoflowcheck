@@ -25,7 +25,7 @@ export const PLANS = {
     name: "Free",
     price: 0,
     aiQueries: 3,
-    features: ["3 AI queries/day", "Basic market data", "Top 40 coins"],
+    features: ["5 AI queries/day", "Basic market data", "Top 40 coins"],
   },
   pro: {
     name: "Pro",
@@ -34,11 +34,11 @@ export const PLANS = {
     aiQueries: -1,
     features: [
       "Unlimited AI analysis",
-      "Whale alert notifications",
-      "Portfolio tracking",
-      "Priority data refresh",
-      "Custom coin alerts",
-      "Export reports",
+      "Advanced volume watches",
+      "Local portfolio P&L",
+      "Custom threshold alerts",
+      "CSV data export",
+      "Saved analysis history",
     ],
   },
 } as const;

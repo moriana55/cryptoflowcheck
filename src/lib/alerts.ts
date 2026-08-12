@@ -5,7 +5,8 @@
  * When the live value crosses the threshold the watch is "triggered" and shown
  * in the digest. Persisted in localStorage, namespaced per user identity (same
  * cookie hint as the portfolio store). Pure code — evaluation runs entirely on
- * public Binance price data passed in by the caller.
+ * public Binance price data passed in by the caller. The signed subscription
+ * identity is HTTP-only, so persisted watch data remains device-scoped.
  *
  * Tier note: "basic" watches (price/percent on a single tracked coin) are free.
  * "Advanced" watches (whale-volume threshold, multi-condition) are gated behind

@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { isProSubscriber } from "@/lib/subscriptions";
 import { resolveTier, TIER_EMAIL_COOKIE, type Tier } from "@/lib/tierLogic";
+import { verifySubscriptionIdentity } from "@/lib/subscriptionIdentity";
 
 export { TIER_EMAIL_COOKIE, DAILY_AI_QUERY_LIMIT } from "@/lib/tierLogic";
 export type { Tier } from "@/lib/tierLogic";
@@ -15,7 +16,7 @@ export async function getRequestTier(): Promise<{ tier: Tier; email: string | nu
   let email: string | null = null;
   try {
     const store = await cookies();
-    email = store.get(TIER_EMAIL_COOKIE)?.value ?? null;
+    email = await verifySubscriptionIdentity(store.get(TIER_EMAIL_COOKIE)?.value);
   } catch {
     email = null;
   }
