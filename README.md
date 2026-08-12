@@ -58,7 +58,7 @@ The 31-case suite covers:
 
 ## Run locally
 
-Requirements: Node.js 20.x and npm.
+Requirements: Node.js 24+ and npm.
 
 ```bash
 git clone https://github.com/moriana55/cryptoflowcheck.git
