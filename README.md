@@ -9,6 +9,12 @@ A crypto market-intelligence dashboard built around public exchange data, determ
 
 > Portfolio status: lint, 35 automated tests, the Next.js production build, and the dependency audit are verified locally and repeated by public CI. Live Stripe settlement, OpenAI generation, and external exchange availability require owner-managed credentials or services and are documented as deployment gates.
 
+## Product evidence
+
+[![CryptoFlowCheck market dashboard](docs/screenshots/home-desktop.png)](docs/screenshots/home-desktop.png)
+
+Current default-branch UI running against the public market-data adapter. Prices in the capture are a point-in-time snapshot, not a performance or availability claim.
+
 ## What it demonstrates
 
 - **Public market data:** Binance REST/WebSocket price paths, historical candles, 24-hour change, volume, comparisons, heatmaps, and fear/greed context.
