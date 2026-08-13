@@ -7,6 +7,9 @@ import { getCoinMap } from "@/lib/coins";
 import { getLivePrice } from "@/lib/livePrices";
 import { EXCHANGES } from "@/data/exchanges";
 import { fetchFearGreed } from "@/lib/binance";
+import { getSafeComparisonHref } from "@/lib/safeComparisonLink";
+
+const EXCHANGE_IDS = new Set(EXCHANGES.map((exchange) => exchange.id));
 
 function renderMessage(text: string) {
   const parts = text.split(/(\*\*.+?\*\*|\[.+?\]\(.+?\))/g);
@@ -16,11 +19,14 @@ function renderMessage(text: string) {
     }
     const linkMatch = part.match(/\[(.+?)\]\((.+?)\)/);
     if (linkMatch) {
-      return (
-        <Link key={i} href={linkMatch[2]} className="text-primary hover:underline">
-          {linkMatch[1]}
-        </Link>
-      );
+      const safeHref = getSafeComparisonHref(linkMatch[2], EXCHANGE_IDS);
+      return safeHref ? (
+          <Link key={i} href={safeHref} className="text-primary hover:underline">
+            {linkMatch[1]}
+          </Link>
+        ) : (
+          <span key={i}>{linkMatch[1]}</span>
+        );
     }
     return <span key={i}>{part}</span>;
   });

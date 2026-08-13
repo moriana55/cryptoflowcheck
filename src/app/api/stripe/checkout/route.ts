@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getStripe, PLANS, isStripeConfigured } from "@/lib/stripe";
 import { rateLimit, getClientIP } from "@/lib/rateLimit";
-
-const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { isValidEmail } from "@/lib/email";
 
 export async function POST(request: NextRequest) {
   if (!isStripeConfigured()) {
@@ -24,7 +23,7 @@ export async function POST(request: NextRequest) {
   try {
     const { email } = await request.json();
 
-    if (!email || typeof email !== "string" || !EMAIL_RE.test(email)) {
+    if (!isValidEmail(email)) {
       return NextResponse.json({ error: "Valid email required" }, { status: 400 });
     }
 
