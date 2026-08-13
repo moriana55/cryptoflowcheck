@@ -3,11 +3,11 @@
 A crypto market-intelligence dashboard built around public exchange data, deterministic portfolio math, guarded AI features, and a security-conscious Stripe subscription flow.
 
 [![CI](https://github.com/moriana55/cryptoflowcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/moriana55/cryptoflowcheck/actions/workflows/ci.yml)
-[![Tests](https://img.shields.io/badge/tests-31%20passing-16a34a)](tests)
+[![Tests](https://img.shields.io/badge/tests-35%20passing-16a34a)](tests)
 [![Security audit](https://img.shields.io/badge/npm%20audit-0%20vulnerabilities-16a34a)](docs/showcase-audit.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-> Portfolio status: lint, 31 automated tests, the Next.js production build, and the dependency audit are verified locally. Live Stripe settlement, OpenAI generation, and external exchange availability require owner-managed credentials or services and are documented as deployment gates.
+> Portfolio status: lint, 35 automated tests, the Next.js production build, and the dependency audit are verified locally and repeated by public CI. Live Stripe settlement, OpenAI generation, and external exchange availability require owner-managed credentials or services and are documented as deployment gates.
 
 ## What it demonstrates
 
@@ -45,16 +45,19 @@ The animated terminal scanner is deliberately labeled **SIMULATED**. It is a pre
 - Changed Checkout success handling so typing or forging a paid email cannot directly create a Pro identity.
 - Kept Stripe webhook signature verification on the raw request body and rejected missing configuration.
 - Rate-limit identity prefers proxy-derived addresses and validates IP shape before keying counters.
+- Assistant-generated comparison links are reconstructed from allowlisted exchange IDs; unsafe destinations render as plain text.
+- Checkout email validation is bounded and linear-time rather than dependent on a backtracking regular expression.
 
 ## Test coverage
 
-The 31-case suite covers:
+The 35-case suite covers:
 
 - portfolio P&L, aggregate totals, missing prices, drawdown alerts, and zero-cost edge cases;
 - CSV formula injection and RFC-compatible quoting;
 - Stripe-style signature tampering, wrong secrets, timestamps, and malformed headers;
 - subscription identity signing, tampering, expiry, and missing-secret failure;
 - tier resolution, normalization, cancellation, anonymous access, and forged values.
+- bounded email validation and fail-closed handling of script, external, unknown, and malformed comparison links.
 
 ## Run locally
 

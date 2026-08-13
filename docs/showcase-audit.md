@@ -6,7 +6,7 @@ Audit date: 2026-08-13
 
 | Gate | Result | Evidence |
 | --- | --- | --- |
-| Automated tests | Pass | 31/31 across portfolio, CSV, Stripe signature, identity, and tier logic |
+| Automated tests | Pass | 35/35 across portfolio, CSV, Stripe signature, identity, tier, email, and link-safety logic |
 | ESLint | Pass | Zero errors and zero warnings |
 | Production build | Pass | Next.js 16.3 / React 19 production build |
 | Dependency audit | Pass | `npm audit`: zero known vulnerabilities |
@@ -20,6 +20,8 @@ Audit date: 2026-08-13
 - Added missing-secret, tamper, and expiry tests.
 - Migrated to Next.js 16 proxy and ESLint conventions.
 - Updated the previously vulnerable framework/runtime dependency chain.
+- Replaced a polynomial email regex and rebuilt assistant comparison links from an explicit local allowlist.
+- Enabled GitHub CodeQL default setup; the current default branch has zero open code-scanning alerts.
 
 ## Open production gates
 
