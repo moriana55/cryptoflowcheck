@@ -2,7 +2,7 @@
 
 A crypto market-intelligence dashboard built around public exchange data, deterministic portfolio math, guarded AI features, and a security-conscious Stripe subscription flow.
 
-[![CI](https://github.com/moriana55/cryptoflowcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/moriana55/cryptoflowcheck/actions/workflows/ci.yml)
+[![CI](https://github.com/yigiterturk-dev/cryptoflowcheck/actions/workflows/ci.yml/badge.svg)](https://github.com/yigiterturk-dev/cryptoflowcheck/actions/workflows/ci.yml)
 [![Tests](https://img.shields.io/badge/tests-35%20passing-16a34a)](tests)
 [![Security audit](https://img.shields.io/badge/npm%20audit-0%20vulnerabilities-16a34a)](docs/showcase-audit.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
@@ -70,7 +70,7 @@ The 35-case suite covers:
 Requirements: Node.js 24+ and npm.
 
 ```bash
-git clone https://github.com/moriana55/cryptoflowcheck.git
+git clone https://github.com/yigiterturk-dev/cryptoflowcheck.git
 cd cryptoflowcheck
 npm ci
 cp .env.example .env.local
